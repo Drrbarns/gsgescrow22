@@ -1,0 +1,407 @@
+"use client";
+
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { ArrowLeft, ArrowRight, ShieldCheck, Lock } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Input, Label, Textarea, FieldHint } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { calculateFees } from "@/lib/payments";
+import { formatGhs, ghsToPesewas } from "@/lib/utils";
+import { createTransaction } from "@/lib/actions/transaction";
+
+const BUYER_BPS = 150;
+const SELLER_BPS = 150;
+const RIDER_FEE = 200;
+
+type Form = {
+  itemDescription: string;
+  itemLink: string;
+  productCedis: string;
+  deliveryCedis: string;
+  sellerName: string;
+  sellerPhone: string;
+  sellerHandle: string;
+  buyerName: string;
+  buyerPhone: string;
+  buyerEmail: string;
+  deliveryAddress: string;
+  deliveryCity: string;
+};
+
+const STEPS = [
+  { n: 1, t: "What you're buying" },
+  { n: 2, t: "Who from + where" },
+  { n: 3, t: "Confirm and pay" },
+];
+
+export interface BuyerWizardPrefill {
+  sellerHandle?: string;
+  sellerName?: string;
+  sellerPhone?: string;
+  itemDescription?: string;
+  itemLink?: string;
+  productCedis?: string;
+  deliveryCedis?: string;
+}
+
+export function BuyerWizard({
+  prefill,
+  sellerHandle,
+}: {
+  prefill?: BuyerWizardPrefill;
+  sellerHandle?: string;
+}) {
+  const router = useRouter();
+  const initial = prefill ?? { sellerHandle };
+  const [step, setStep] = useState(initial.itemDescription && initial.productCedis ? 2 : 1);
+  const [form, setForm] = useState<Form>({
+    itemDescription: initial.itemDescription ?? "",
+    itemLink: initial.itemLink ?? "",
+    productCedis: initial.productCedis ?? "",
+    deliveryCedis: initial.deliveryCedis ?? "0",
+    sellerName: initial.sellerName ?? "",
+    sellerPhone: initial.sellerPhone ?? "",
+    sellerHandle: initial.sellerHandle ?? "",
+    buyerName: "",
+    buyerPhone: "",
+    buyerEmail: "",
+    deliveryAddress: "",
+    deliveryCity: "Accra",
+  });
+  const [isPending, startTransition] = useTransition();
+
+  const fees = useMemo(
+    () =>
+      calculateFees({
+        productAmount: ghsToPesewas(form.productCedis || "0"),
+        deliveryAmount: ghsToPesewas(form.deliveryCedis || "0"),
+        buyerFeeBps: BUYER_BPS,
+        sellerFeeBps: SELLER_BPS,
+        riderReleaseFee: RIDER_FEE,
+      }),
+    [form.productCedis, form.deliveryCedis],
+  );
+
+  function set<K extends keyof Form>(k: K, v: Form[K]) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  function canNext(): boolean {
+    if (step === 1)
+      return Boolean(form.itemDescription && Number(form.productCedis) > 0);
+    if (step === 2)
+      return Boolean(
+        form.sellerName &&
+          form.sellerPhone &&
+          form.buyerName &&
+          form.buyerPhone &&
+          form.deliveryAddress &&
+          form.deliveryCity,
+      );
+    return true;
+  }
+
+  async function submit() {
+    startTransition(async () => {
+      const r = await createTransaction({
+        initiatedBy: "buyer",
+        buyerName: form.buyerName,
+        buyerPhone: form.buyerPhone,
+        buyerEmail: form.buyerEmail,
+        sellerName: form.sellerName,
+        sellerPhone: form.sellerPhone,
+        sellerHandle: form.sellerHandle || undefined,
+        itemDescription: form.itemDescription,
+        itemLink: form.itemLink,
+        deliveryAddress: form.deliveryAddress,
+        deliveryCity: form.deliveryCity,
+        productCedis: Number(form.productCedis),
+        deliveryCedis: Number(form.deliveryCedis || "0"),
+      });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      toast.success("Order created — opening secure checkout");
+      router.push(r.authorizationUrl);
+    });
+  }
+
+  return (
+    <div className="grid lg:grid-cols-12 gap-6">
+      <div className="lg:col-span-8">
+        <Stepper step={step} />
+        <Card className="p-6 sm:p-8 mt-6">
+          {step === 1 && (
+            <div className="space-y-5">
+              <h3 className="font-display text-xl font-semibold">What are you buying?</h3>
+              <div>
+                <Label htmlFor="item" required>What's the item?</Label>
+                <Textarea
+                  id="item"
+                  rows={3}
+                  placeholder="e.g. Black kente dress, size M, the one in the second photo"
+                  value={form.itemDescription}
+                  onChange={(e) => set("itemDescription", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="link">Link to the post (optional)</Label>
+                <Input
+                  id="link"
+                  placeholder="https://instagram.com/p/..."
+                  value={form.itemLink}
+                  onChange={(e) => set("itemLink", e.target.value)}
+                />
+                <FieldHint>Pasting the IG/TikTok/WhatsApp link helps the seller match your DM faster.</FieldHint>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="price" required>Agreed price</Label>
+                  <Input
+                    id="price"
+                    inputMode="decimal"
+                    leading="₵"
+                    value={form.productCedis}
+                    onChange={(e) => set("productCedis", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="delivery">Delivery fee (if any)</Label>
+                  <Input
+                    id="delivery"
+                    inputMode="decimal"
+                    leading="₵"
+                    value={form.deliveryCedis}
+                    onChange={(e) => set("deliveryCedis", e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-5">
+              <h3 className="font-display text-xl font-semibold">Who from + where</h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="sn" required>Seller's name</Label>
+                  <Input
+                    id="sn"
+                    placeholder="Ama from Kente Couture"
+                    value={form.sellerName}
+                    onChange={(e) => set("sellerName", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sp" required>Seller's phone</Label>
+                  <Input
+                    id="sp"
+                    placeholder="024 000 0000"
+                    value={form.sellerPhone}
+                    onChange={(e) => set("sellerPhone", e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="sh">Seller's SBBS handle (if any)</Label>
+                <Input
+                  id="sh"
+                  placeholder="@kentecouture"
+                  value={form.sellerHandle}
+                  onChange={(e) => set("sellerHandle", e.target.value.replace(/^@/, ""))}
+                />
+              </div>
+              <hr className="border-[var(--border)]" />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="bn" required>Your name</Label>
+                  <Input
+                    id="bn"
+                    value={form.buyerName}
+                    onChange={(e) => set("buyerName", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="bp" required>Your phone</Label>
+                  <Input
+                    id="bp"
+                    placeholder="024 000 0000"
+                    value={form.buyerPhone}
+                    onChange={(e) => set("buyerPhone", e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="be">Your email (optional but recommended)</Label>
+                <Input
+                  id="be"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={form.buyerEmail}
+                  onChange={(e) => set("buyerEmail", e.target.value)}
+                />
+                <FieldHint>For your receipt and Hub account.</FieldHint>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <Label htmlFor="da" required>Delivery address</Label>
+                  <Textarea
+                    id="da"
+                    rows={2}
+                    placeholder="House number, area, landmark"
+                    value={form.deliveryAddress}
+                    onChange={(e) => set("deliveryAddress", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dc" required>City</Label>
+                  <Input
+                    id="dc"
+                    value={form.deliveryCity}
+                    onChange={(e) => set("deliveryCity", e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-5">
+              <h3 className="font-display text-xl font-semibold">Review and pay</h3>
+              <div className="rounded-[var(--radius-md)] border border-[var(--border)] divide-y divide-[var(--border)]">
+                <Detail label="Item" value={form.itemDescription} />
+                <Detail label="Seller" value={`${form.sellerName} · ${form.sellerPhone}`} />
+                <Detail label="You" value={`${form.buyerName} · ${form.buyerPhone}`} />
+                <Detail label="Delivery to" value={`${form.deliveryAddress}, ${form.deliveryCity}`} />
+              </div>
+              <div className="rounded-[var(--radius-md)] bg-[var(--surface-muted)] p-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-[var(--muted)]">Product</span>
+                  <span className="font-medium">{formatGhs(ghsToPesewas(form.productCedis || "0"))}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="text-[var(--muted)]">Delivery</span>
+                  <span className="font-medium">{formatGhs(ghsToPesewas(form.deliveryCedis || "0"))}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="text-[var(--muted)]">Buyer protection (1.5%)</span>
+                  <span className="font-medium">{formatGhs(fees.buyerFee)}</span>
+                </div>
+                {fees.riderReleaseFee > 0 && (
+                  <div className="flex justify-between text-sm mt-2">
+                    <span className="text-[var(--muted)]">Rider release fee</span>
+                    <span className="font-medium">{formatGhs(fees.riderReleaseFee)}</span>
+                  </div>
+                )}
+                <div className="border-t border-[var(--border)] mt-3 pt-3 flex justify-between items-baseline">
+                  <span className="font-semibold">You pay SBBS</span>
+                  <span className="font-display font-bold text-2xl">{formatGhs(fees.totalCharged)}</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)] p-3">
+                <Lock size={16} className="mt-0.5 shrink-0" />
+                <p className="text-sm">
+                  Your money is held by Moolre until you confirm the goods
+                  arrived. SBBS staff cannot touch funds.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-8 flex items-center justify-between">
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setStep((s) => Math.max(1, s - 1))}
+              disabled={step === 1}
+            >
+              <ArrowLeft size={16} /> Back
+            </Button>
+            {step < 3 ? (
+              <Button
+                type="button"
+                onClick={() => canNext() && setStep((s) => s + 1)}
+                disabled={!canNext()}
+              >
+                Continue <ArrowRight size={16} />
+              </Button>
+            ) : (
+              <Button type="button" onClick={submit} loading={isPending}>
+                <ShieldCheck size={16} /> Pay {formatGhs(fees.totalCharged)} safely
+              </Button>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      <aside className="lg:col-span-4">
+        <Card className="p-6 lg:sticky lg:top-24">
+          <Badge tone="success" dot>Protected by SBBS</Badge>
+          <h3 className="font-display text-lg font-semibold mt-4">
+            What happens next
+          </h3>
+          <ol className="mt-4 space-y-3 text-sm">
+            <li className="flex gap-3">
+              <span className="font-mono text-xs text-[var(--muted)]">01</span>
+              <span>You pay SBBS through Moolre.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="font-mono text-xs text-[var(--muted)]">02</span>
+              <span>The seller is SMS&rsquo;d that funds are held and dispatches.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="font-mono text-xs text-[var(--muted)]">03</span>
+              <span>You inspect, then release the delivery code.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="font-mono text-xs text-[var(--muted)]">04</span>
+              <span>SBBS approver releases payout to the seller&rsquo;s MoMo.</span>
+            </li>
+          </ol>
+        </Card>
+      </aside>
+    </div>
+  );
+}
+
+function Stepper({ step }: { step: number }) {
+  return (
+    <div className="flex items-center gap-3">
+      {STEPS.map((s, i) => (
+        <div key={s.n} className="flex items-center gap-3 flex-1">
+          <div
+            className={
+              "flex items-center gap-3 px-3 py-2 rounded-full text-sm font-medium " +
+              (step === s.n
+                ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
+                : step > s.n
+                  ? "bg-[var(--primary-soft)] text-[var(--primary)]"
+                  : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--border-strong)]")
+            }
+          >
+            <span className="font-mono text-xs">0{s.n}</span>
+            <span className="hidden sm:inline">{s.t}</span>
+          </div>
+          {i < STEPS.length - 1 && (
+            <div className="flex-1 h-px bg-[var(--border-strong)]" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="px-4 py-3 flex items-baseline justify-between gap-4">
+      <span className="text-xs uppercase tracking-[0.14em] font-semibold text-[var(--muted)] shrink-0">
+        {label}
+      </span>
+      <span className="text-sm text-right">{value}</span>
+    </div>
+  );
+}

@@ -28,19 +28,43 @@ export default async function AdminTxnDetailPage({
   const [txn] = await db.select().from(transactions).where(eq(transactions.ref, ref)).limit(1);
   if (!txn) return notFound();
 
-  const actor = await getCurrentProfile();
-  const isSuperadmin = actor?.role === "superadmin";
+  let isSuperadmin = false;
+  try {
+    const actor = await getCurrentProfile();
+    isSuperadmin = actor?.role === "superadmin";
+  } catch (err) {
+    console.error(`[admin/txn] getCurrentProfile failed for ref=${ref}:`, (err as Error).message);
+  }
 
   const events = await db
     .select()
     .from(transactionEvents)
     .where(eq(transactionEvents.transactionId, txn.id))
     .orderBy(desc(transactionEvents.createdAt))
-    .limit(40);
+    .limit(40)
+    .catch((err) => {
+      console.error(`[admin/txn] events query failed:`, err);
+      return [];
+    });
 
-  const [payout] = await db.select().from(payouts).where(eq(payouts.transactionId, txn.id)).limit(1);
-  const [pay] = await db.select().from(payments).where(eq(payments.transactionId, txn.id)).limit(1);
-  const [dispute] = await db.select().from(disputes).where(eq(disputes.transactionId, txn.id)).limit(1);
+  const [payout] = await db
+    .select()
+    .from(payouts)
+    .where(eq(payouts.transactionId, txn.id))
+    .limit(1)
+    .catch(() => [] as typeof payouts.$inferSelect[]);
+  const [pay] = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.transactionId, txn.id))
+    .limit(1)
+    .catch(() => [] as typeof payments.$inferSelect[]);
+  const [dispute] = await db
+    .select()
+    .from(disputes)
+    .where(eq(disputes.transactionId, txn.id))
+    .limit(1)
+    .catch(() => [] as typeof disputes.$inferSelect[]);
 
   return (
     <>

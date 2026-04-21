@@ -9,6 +9,8 @@ import { transactions } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { formatGhs, relativeTime } from "@/lib/utils";
 import type { TxnState } from "@/lib/state/transaction";
+import { getCurrentProfile } from "@/lib/auth/session";
+import { TxnRowActions } from "@/components/admin/txn-row-actions";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin · Transactions" };
@@ -29,6 +31,12 @@ export default async function AdminTxnsPage() {
       }));
     } catch {}
   }
+
+  let isSuperadmin = false;
+  try {
+    const actor = await getCurrentProfile();
+    isSuperadmin = actor?.role === "superadmin";
+  } catch {}
 
   return (
     <>
@@ -63,7 +71,15 @@ export default async function AdminTxnsPage() {
                       <td className="px-4 py-3 text-[var(--muted)]">{r.sellerName}</td>
                       <td className="px-4 py-3 text-right font-semibold">{formatGhs(r.totalCharged)}</td>
                       <td className="px-4 py-3"><StateBadge state={r.state} /></td>
-                      <td className="px-6 py-3 text-right text-[var(--muted)]">{relativeTime(r.createdAt)}</td>
+                      <td className="px-6 py-3 text-right text-[var(--muted)]">
+                        <div className="flex items-center justify-end gap-2">
+                          <TxnRowActions
+                            ref={r.ref}
+                            canForce={isSuperadmin && r.state === "awaiting_payment"}
+                          />
+                          <span>{relativeTime(r.createdAt)}</span>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

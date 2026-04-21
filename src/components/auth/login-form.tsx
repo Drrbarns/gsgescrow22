@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -30,7 +29,6 @@ export function LoginForm({
   authLive: boolean;
   intent?: "login" | "signup";
 }) {
-  const router = useRouter();
   const [tab, setTab] = useState<Mode>("phone");
   const [step, setStep] = useState<"enter" | "code">("enter");
 
@@ -114,8 +112,7 @@ export function LoginForm({
         await ensureProfile({}).catch(() => {});
       }
       toast.success(isSignup ? "Welcome to SBBS" : "Signed in");
-      router.push(await postLoginRedirect(next));
-      router.refresh();
+      window.location.assign(await postLoginRedirect(next));
     } catch (err) {
       toast.error((err as Error).message ?? "Invalid code");
     } finally {
@@ -158,8 +155,7 @@ export function LoginForm({
       if (error) throw error;
       await ensureProfile({ displayName: displayName || undefined }).catch(() => {});
       toast.success(isSignup ? "Welcome to SBBS" : "Signed in");
-      router.push(await postLoginRedirect(next));
-      router.refresh();
+      window.location.assign(await postLoginRedirect(next));
     } catch (err) {
       toast.error((err as Error).message ?? "Invalid code");
     } finally {
@@ -194,8 +190,7 @@ export function LoginForm({
         if (data.session) {
           await ensureProfile({ displayName: displayName || undefined }).catch(() => {});
           toast.success("Account created");
-          router.push(await postLoginRedirect(next));
-          router.refresh();
+          window.location.assign(await postLoginRedirect(next));
         } else {
           toast.success(
             "Check your email — confirm it to finish signing up, then come back here to log in.",
@@ -206,8 +201,7 @@ export function LoginForm({
         if (error) throw error;
         await ensureProfile({}).catch(() => {});
         toast.success("Signed in");
-        router.push(await postLoginRedirect(next));
-        router.refresh();
+        window.location.assign(await postLoginRedirect(next));
       }
     } catch (err) {
       toast.error((err as Error).message ?? "Invalid credentials");

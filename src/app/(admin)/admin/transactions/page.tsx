@@ -74,7 +74,7 @@ export default async function AdminTxnsPage() {
                       <td className="px-6 py-3 text-right text-[var(--muted)]">
                         <div className="flex items-center justify-end gap-2">
                           <TxnRowActions
-                            ref={r.ref}
+                            txnRef={r.ref}
                             canForce={isSuperadmin && r.state === "awaiting_payment"}
                           />
                           <span>{relativeTime(r.createdAt)}</span>

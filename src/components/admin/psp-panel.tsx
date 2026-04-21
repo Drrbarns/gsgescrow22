@@ -11,7 +11,7 @@ import { reverifyPayment, reverifyPayout, forceMarkPaid } from "@/lib/actions/ad
 
 interface Props {
   provider: string;
-  ref: string;
+  txnRef: string;
   paymentPspRef: string | null;
   paymentAuthorizationUrl: string | null;
   paymentState: string | null;
@@ -28,7 +28,7 @@ interface Props {
 
 export function PspPanel({
   provider,
-  ref,
+  txnRef,
   paymentPspRef,
   paymentAuthorizationUrl,
   paymentState,
@@ -69,9 +69,9 @@ export function PspPanel({
       <div className="space-y-3">
         <RefRow
           label="Our reference"
-          value={ref}
+          value={txnRef}
           mono
-          onCopy={() => copy(ref, "ref")}
+          onCopy={() => copy(txnRef, "ref")}
           copied={copied === "ref"}
         />
         {paymentPspRef && (
@@ -123,7 +123,7 @@ export function PspPanel({
             loading={isPending}
             onClick={() =>
               startTransition(async () => {
-                const r = await reverifyPayment(ref);
+                const r = await reverifyPayment(txnRef);
                 if (!r.ok) toast.error(r.error ?? "Failed");
                 else toast.success(r.message ?? `PSP status: ${r.status}`);
                 router.refresh();
@@ -177,7 +177,7 @@ export function PspPanel({
               );
               if (!reason || reason.trim().length < 5) return;
               startTransition(async () => {
-                const r = await forceMarkPaid(ref, reason.trim());
+                const r = await forceMarkPaid(txnRef, reason.trim());
                 if (!r.ok) toast.error(r.error ?? "Failed");
                 else toast.success(r.message ?? "Force-settled");
                 router.refresh();

@@ -142,7 +142,7 @@ export default async function AdminTxnDetailPage({
               return (
                 <PspPanel
                   provider={psp.provider}
-                  ref={txn.ref}
+                  txnRef={txn.ref}
                   paymentPspRef={pay?.pspReference ?? null}
                   paymentAuthorizationUrl={pay?.authorizationUrl ?? null}
                   paymentState={pay?.state ?? null}

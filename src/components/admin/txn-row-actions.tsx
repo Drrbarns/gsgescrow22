@@ -7,11 +7,11 @@ import { Zap } from "lucide-react";
 import { forceMarkPaid } from "@/lib/actions/admin-reverify";
 
 interface Props {
-  ref: string;
+  txnRef: string;
   canForce: boolean;
 }
 
-export function TxnRowActions({ ref: txnRef, canForce }: Props) {
+export function TxnRowActions({ txnRef, canForce }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 

@@ -24,55 +24,31 @@ function mask(s: string | undefined): string {
   return `${s.slice(0, 3)}…${s.slice(-3)} (len=${s.length})`;
 }
 
+/**
+ * Moolre SMS uses ONLY X-API-VASKEY for auth (per the /open/sms/send docs).
+ * No X-API-USER, no X-API-ACCOUNT, no X-API-KEY needed here — those belong
+ * to the payments API. An AIN01 response means the VASKEY value itself is
+ * invalid or the SMS VAS product isn't enabled on the Moolre account.
+ */
 async function call(body: unknown): Promise<MoolreSmsEnvelope> {
-  const user = env.MOOLRE_USERNAME;
   const vaskey = env.MOOLRE_SMS_VASKEY;
-  const pubkey = env.MOOLRE_PUBLIC_KEY;
-  const privkey = env.MOOLRE_API_KEY;
-  const account = env.MOOLRE_ACCOUNT_NUMBER;
-
-  if (!user) {
-    throw new Error("Moolre SMS not configured: MOOLRE_USERNAME missing");
-  }
-  if (!vaskey && !pubkey && !privkey) {
+  if (!vaskey) {
     throw new Error(
-      "Moolre SMS not configured: need MOOLRE_SMS_VASKEY (or MOOLRE_PUBLIC_KEY / MOOLRE_API_KEY)",
+      "Moolre SMS not configured: MOOLRE_SMS_VASKEY missing. Register for the SMS VAS on moolre.com to obtain one.",
     );
   }
 
   const headers: Record<string, string> = {
-    "X-API-USER": user,
+    "X-API-VASKEY": vaskey,
     "Content-Type": "application/json",
     Accept: "application/json",
   };
-  let keyKind = "none";
-  if (vaskey) {
-    headers["X-API-VASKEY"] = vaskey;
-    keyKind = "VASKEY";
-  } else if (privkey) {
-    headers["X-API-KEY"] = privkey;
-    keyKind = "KEY";
-  } else if (pubkey) {
-    headers["X-API-PUBKEY"] = pubkey;
-    keyKind = "PUBKEY";
-  }
-  if (pubkey && !headers["X-API-PUBKEY"]) {
-    headers["X-API-PUBKEY"] = pubkey;
-  }
-  if (account) {
-    headers["X-API-ACCOUNT"] = account;
-  }
-
   if (env.MOOLRE_SMS_SCENARIO) {
     headers["X-Scenario-Key"] = env.MOOLRE_SMS_SCENARIO;
   }
 
   console.log("[moolre-sms] POST", ENDPOINT, {
-    user: mask(user),
-    keyKind,
-    key: mask(vaskey || privkey || pubkey),
-    pubkey: mask(pubkey),
-    account: mask(account),
+    vaskey: mask(vaskey),
     senderId: env.MOOLRE_SMS_SENDER_ID,
     scenario: env.MOOLRE_SMS_SCENARIO || "(none)",
   });
@@ -101,7 +77,13 @@ async function call(body: unknown): Promise<MoolreSmsEnvelope> {
     });
     const code = json.code ?? res.status;
     const msg = json.message ?? res.statusText;
-    throw new Error(`Moolre SMS failed (code=${code}): ${msg} [using ${keyKind}]`);
+    const hint =
+      code === "AIN01"
+        ? " — the VASKEY is invalid or SMS VAS is not activated on your Moolre account"
+        : code === "ASMS07"
+          ? ` — sender ID "${env.MOOLRE_SMS_SENDER_ID}" not approved by Moolre`
+          : "";
+    throw new Error(`Moolre SMS failed (code=${code}): ${msg}${hint}`);
   }
   return json;
 }

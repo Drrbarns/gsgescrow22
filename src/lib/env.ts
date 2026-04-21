@@ -131,10 +131,7 @@ export const isMoolreLive = Boolean(
 );
 export const isPaystackLive = Boolean(env.PAYSTACK_SECRET_KEY);
 export const isPaymentsLive = isMoolreLive || isPaystackLive;
-export const isMoolreSmsLive = Boolean(
-  env.MOOLRE_USERNAME &&
-    (env.MOOLRE_SMS_VASKEY || env.MOOLRE_API_KEY || env.MOOLRE_PUBLIC_KEY),
-);
+export const isMoolreSmsLive = Boolean(env.MOOLRE_SMS_VASKEY);
 export const isHubtelSmsLive = Boolean(env.HUBTEL_CLIENT_ID && env.HUBTEL_CLIENT_SECRET);
 export const isSmsLive = isMoolreSmsLive || isHubtelSmsLive;
 export const isEmailLive = Boolean(env.RESEND_API_KEY);

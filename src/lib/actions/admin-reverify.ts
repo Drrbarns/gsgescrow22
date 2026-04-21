@@ -11,6 +11,51 @@ import { getPsp } from "@/lib/payments";
 import { markPaid } from "@/lib/actions/transaction";
 
 /**
+ * Break-glass: force-mark a transaction as paid without calling the PSP.
+ * Superadmin only. Use when Moolre's status API is unreachable but we've
+ * confirmed the payment landed via their dashboard or via their SMS receipt.
+ * Creates an audit entry so ops can trace every manual settlement.
+ */
+export async function forceMarkPaid(
+  ref: string,
+  reason: string,
+): Promise<{ ok: boolean; error?: string; message?: string }> {
+  if (!isDbLive) return { ok: false, error: "DB not configured" };
+  const actor = await getCurrentProfile();
+  if (!actor || actor.role !== "superadmin") {
+    return { ok: false, error: "Superadmin only" };
+  }
+  if (!reason || reason.trim().length < 5) {
+    return { ok: false, error: "Reason must be at least 5 characters" };
+  }
+
+  const db = getDb();
+  const [txn] = await db.select().from(transactions).where(eq(transactions.ref, ref)).limit(1);
+  if (!txn) return { ok: false, error: "Transaction not found" };
+  if (txn.state !== "awaiting_payment") {
+    return { ok: false, error: `Transaction is already in state '${txn.state}'` };
+  }
+
+  await audit({
+    action: "webhook.received",
+    targetType: "transaction",
+    targetId: txn.id,
+    reason: `FORCE mark paid by superadmin: ${reason}`,
+    payload: { actor: actor.email, ref, previousState: txn.state },
+  });
+
+  const r = await markPaid(ref);
+  if (!r.ok) return { ok: false, error: r.error ?? "markPaid failed" };
+
+  revalidatePath(`/admin/transactions/${ref}`);
+  revalidatePath(`/admin/transactions`);
+  return {
+    ok: true,
+    message: "Transaction force-marked as paid. Seller notified via SMS.",
+  };
+}
+
+/**
  * Force a re-verify of a payment against the active PSP. If the PSP reports
  * succeeded and our record still shows awaiting_payment, we run markPaid()
  * and the normal post-payment side effects fire (SMS + receipt email + state

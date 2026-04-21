@@ -13,6 +13,7 @@ import { formatGhs, relativeTime } from "@/lib/utils";
 import type { TxnState } from "@/lib/state/transaction";
 import { PspPanel } from "@/components/admin/psp-panel";
 import { getPsp } from "@/lib/payments";
+import { getCurrentProfile } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,9 @@ export default async function AdminTxnDetailPage({
   const db = getDb();
   const [txn] = await db.select().from(transactions).where(eq(transactions.ref, ref)).limit(1);
   if (!txn) return notFound();
+
+  const actor = await getCurrentProfile();
+  const isSuperadmin = actor?.role === "superadmin";
 
   const events = await db
     .select()
@@ -129,6 +133,8 @@ export default async function AdminTxnDetailPage({
                   }
                   paymentDashboardUrl={paymentDashboardUrl}
                   payoutDashboardUrl={payoutDashboardUrl}
+                  currentState={txn.state}
+                  isSuperadmin={isSuperadmin}
                 />
               );
             })()}

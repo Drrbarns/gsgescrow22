@@ -14,11 +14,35 @@ import { stateLabel, type TxnState } from "@/lib/state/transaction";
 import { StateBadge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 15;
+
+/** Race a promise against a timeout so the page never blocks on Moolre. */
+async function withDeadline<T>(p: Promise<T>, ms: number, label: string): Promise<T | null> {
+  let timer: NodeJS.Timeout | undefined;
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => {
+      console.warn(`[buy/return] ${label} deadline ${ms}ms exceeded`);
+      resolve(null);
+    }, ms);
+  });
+  try {
+    const result = await Promise.race([p, timeout]);
+    return result;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 export default async function ReturnPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string; reference?: string; trxref?: string; stub?: string }>;
+  searchParams: Promise<{
+    ref?: string;
+    reference?: string;
+    trxref?: string;
+    status?: string;
+    stub?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const ref = sp.ref || sp.reference || sp.trxref;
@@ -30,15 +54,22 @@ export default async function ReturnPage({
       console.log(`[buy/return] ref=${ref} stub path → markPaid`);
       await markPaid(ref);
     } else {
-      try {
-        const v = await getPsp().verifyCharge(ref);
-        console.log(`[buy/return] ref=${ref} verifyCharge=${v.status}`);
-        if (v.status === "succeeded") {
-          const r = await markPaid(ref);
-          console.log(`[buy/return] ref=${ref} markPaid ok=${r.ok} error=${"error" in r ? r.error : ""}`);
-        }
-      } catch (err) {
-        console.error(`[buy/return] ref=${ref} verifyCharge threw:`, (err as Error).message);
+      // Try to verify with a short deadline. If Moolre's status endpoint is
+      // slow/unreachable, fall through — the webhook will settle it.
+      const v = await withDeadline(
+        getPsp().verifyCharge(ref).catch((err: Error) => {
+          console.error(`[buy/return] ref=${ref} verifyCharge threw:`, err.message);
+          return null;
+        }),
+        6000,
+        `verifyCharge(${ref})`,
+      );
+      console.log(`[buy/return] ref=${ref} verifyCharge=${v?.status ?? "timeout"}`);
+      if (v?.status === "succeeded") {
+        const r = await markPaid(ref);
+        console.log(
+          `[buy/return] ref=${ref} markPaid ok=${r.ok} error=${"error" in r ? r.error : ""}`,
+        );
       }
     }
     const [t] = await getDb()
@@ -48,7 +79,14 @@ export default async function ReturnPage({
       .limit(1);
     if (t) {
       state = t.state as TxnState;
-      verified = state === "paid" || state === "dispatched" || state === "delivered" || state === "released" || state === "completed" || state === "payout_pending" || state === "payout_approved";
+      verified =
+        state === "paid" ||
+        state === "dispatched" ||
+        state === "delivered" ||
+        state === "released" ||
+        state === "completed" ||
+        state === "payout_pending" ||
+        state === "payout_approved";
     } else {
       console.warn(`[buy/return] ref=${ref} not found in transactions table`);
     }
@@ -94,8 +132,9 @@ export default async function ReturnPage({
                   Confirming payment&hellip;
                 </h1>
                 <p className="mt-3 text-[var(--muted)]">
-                  Your payment is being verified with Moolre. This usually
-                  takes a few seconds. You can refresh, or check your Hub.
+                  {sp.status === "success"
+                    ? "Moolre has confirmed your payment on their side. We're finalising it on ours — this usually takes under a minute. Refresh this page in a moment, or jump to your Hub."
+                    : "Your payment is being verified with Moolre. This usually takes a few seconds. You can refresh, or check your Hub."}
                 </p>
                 <div className="mt-6 font-mono text-sm text-[var(--muted)]">{ref}</div>
                 <div className="mt-8">

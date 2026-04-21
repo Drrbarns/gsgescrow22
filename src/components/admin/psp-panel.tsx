@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Copy, Check, ExternalLink, RefreshCw } from "lucide-react";
+import { Copy, Check, ExternalLink, RefreshCw, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { reverifyPayment, reverifyPayout } from "@/lib/actions/admin-reverify";
+import { reverifyPayment, reverifyPayout, forceMarkPaid } from "@/lib/actions/admin-reverify";
 
 interface Props {
   provider: string;
@@ -22,6 +22,8 @@ interface Props {
   } | null;
   paymentDashboardUrl: string | null;
   payoutDashboardUrl: string | null;
+  currentState: string;
+  isSuperadmin: boolean;
 }
 
 export function PspPanel({
@@ -33,10 +35,13 @@ export function PspPanel({
   payout,
   paymentDashboardUrl,
   payoutDashboardUrl,
+  currentState,
+  isSuperadmin,
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState<string | null>(null);
+  const canForce = isSuperadmin && currentState === "awaiting_payment";
 
   async function copy(value: string, key: string) {
     try {
@@ -151,6 +156,38 @@ export function PspPanel({
           )}
         </div>
       </div>
+
+      {canForce && (
+        <div className="pt-4 border-t border-[var(--border)] space-y-2">
+          <p className="text-xs uppercase tracking-[0.14em] font-semibold text-amber-700">
+            Break-glass · superadmin only
+          </p>
+          <p className="text-[11px] text-[var(--muted)]">
+            Use ONLY when you&rsquo;ve confirmed the payment landed on Moolre&rsquo;s
+            dashboard but their status API is unreachable. Audit-logged.
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            loading={isPending}
+            onClick={() => {
+              const reason = window.prompt(
+                "Reason for force-marking paid (min 5 chars). This is audit-logged.",
+                "Verified on Moolre dashboard — status API unreachable",
+              );
+              if (!reason || reason.trim().length < 5) return;
+              startTransition(async () => {
+                const r = await forceMarkPaid(ref, reason.trim());
+                if (!r.ok) toast.error(r.error ?? "Failed");
+                else toast.success(r.message ?? "Force-settled");
+                router.refresh();
+              });
+            }}
+          >
+            <Zap size={12} /> Force mark paid
+          </Button>
+        </div>
+      )}
     </Card>
   );
 }

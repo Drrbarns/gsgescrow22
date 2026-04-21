@@ -28,9 +28,15 @@ interface MoolreEnvelope<T = unknown> {
   data?: T;
 }
 
+/**
+ * Hard timeout for Moolre HTTP calls. Their status endpoint has been observed
+ * to hang for 30+ seconds which will kill serverless functions. Cap at 8s.
+ */
+const MOOLRE_TIMEOUT_MS = 8000;
+
 async function moolre<T>(
   path: string,
-  init: { method: "POST" | "GET"; body?: unknown; keyType: KeyType },
+  init: { method: "POST" | "GET"; body?: unknown; keyType: KeyType; timeoutMs?: number },
 ): Promise<MoolreEnvelope<T>> {
   const user = env.MOOLRE_USERNAME;
   if (!user) throw new Error("Moolre not configured: MOOLRE_USERNAME missing");
@@ -48,12 +54,31 @@ async function moolre<T>(
     headers["X-API-PUBKEY"] = env.MOOLRE_PUBLIC_KEY;
   }
 
-  const res = await fetch(`${BASE}${path}`, {
-    method: init.method,
-    headers,
-    body: init.body ? JSON.stringify(init.body) : undefined,
-    cache: "no-store",
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(new Error(`Moolre timeout after ${init.timeoutMs ?? MOOLRE_TIMEOUT_MS}ms`)),
+    init.timeoutMs ?? MOOLRE_TIMEOUT_MS,
+  );
+
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      method: init.method,
+      headers,
+      body: init.body ? JSON.stringify(init.body) : undefined,
+      cache: "no-store",
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timeout);
+    const isAbort = (err as { name?: string }).name === "AbortError";
+    throw new Error(
+      isAbort
+        ? `Moolre ${path} timed out after ${init.timeoutMs ?? MOOLRE_TIMEOUT_MS}ms`
+        : `Moolre ${path} network error: ${(err as Error).message}`,
+    );
+  }
+  clearTimeout(timeout);
 
   const text = await res.text();
   let json: MoolreEnvelope<T>;

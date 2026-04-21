@@ -18,11 +18,18 @@ function normalize(phone: string): string {
   return d;
 }
 
+function mask(s: string | undefined): string {
+  if (!s) return "(missing)";
+  if (s.length <= 6) return "***";
+  return `${s.slice(0, 3)}…${s.slice(-3)} (len=${s.length})`;
+}
+
 async function call(body: unknown): Promise<MoolreSmsEnvelope> {
   const user = env.MOOLRE_USERNAME;
   const vaskey = env.MOOLRE_SMS_VASKEY;
   const pubkey = env.MOOLRE_PUBLIC_KEY;
   const privkey = env.MOOLRE_API_KEY;
+  const account = env.MOOLRE_ACCOUNT_NUMBER;
 
   if (!user) {
     throw new Error("Moolre SMS not configured: MOOLRE_USERNAME missing");
@@ -38,13 +45,37 @@ async function call(body: unknown): Promise<MoolreSmsEnvelope> {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
-  if (vaskey) headers["X-API-VASKEY"] = vaskey;
-  else if (privkey) headers["X-API-KEY"] = privkey;
-  else if (pubkey) headers["X-API-PUBKEY"] = pubkey;
+  let keyKind = "none";
+  if (vaskey) {
+    headers["X-API-VASKEY"] = vaskey;
+    keyKind = "VASKEY";
+  } else if (privkey) {
+    headers["X-API-KEY"] = privkey;
+    keyKind = "KEY";
+  } else if (pubkey) {
+    headers["X-API-PUBKEY"] = pubkey;
+    keyKind = "PUBKEY";
+  }
+  if (pubkey && !headers["X-API-PUBKEY"]) {
+    headers["X-API-PUBKEY"] = pubkey;
+  }
+  if (account) {
+    headers["X-API-ACCOUNT"] = account;
+  }
 
   if (env.MOOLRE_SMS_SCENARIO) {
     headers["X-Scenario-Key"] = env.MOOLRE_SMS_SCENARIO;
   }
+
+  console.log("[moolre-sms] POST", ENDPOINT, {
+    user: mask(user),
+    keyKind,
+    key: mask(vaskey || privkey || pubkey),
+    pubkey: mask(pubkey),
+    account: mask(account),
+    senderId: env.MOOLRE_SMS_SENDER_ID,
+    scenario: env.MOOLRE_SMS_SCENARIO || "(none)",
+  });
 
   const res = await fetch(ENDPOINT, {
     method: "POST",
@@ -57,13 +88,20 @@ async function call(body: unknown): Promise<MoolreSmsEnvelope> {
   try {
     json = text ? (JSON.parse(text) as MoolreSmsEnvelope) : { status: 0 };
   } catch {
+    console.error("[moolre-sms] non-JSON response", res.status, text?.slice(0, 200));
     throw new Error(`Moolre SMS returned non-JSON: ${res.status} ${res.statusText}`);
   }
   const status = typeof json.status === "string" ? Number(json.status) : json.status;
   if (!res.ok || status !== 1) {
+    console.error("[moolre-sms] API rejected", {
+      httpStatus: res.status,
+      code: json.code,
+      message: json.message,
+      data: json.data,
+    });
     const code = json.code ?? res.status;
     const msg = json.message ?? res.statusText;
-    throw new Error(`Moolre SMS failed (code=${code}): ${msg}`);
+    throw new Error(`Moolre SMS failed (code=${code}): ${msg} [using ${keyKind}]`);
   }
   return json;
 }

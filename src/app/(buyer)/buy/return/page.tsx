@@ -27,13 +27,19 @@ export default async function ReturnPage({
 
   if (ref && isDbLive) {
     if (sp.stub === "1" || !isPaymentsLive) {
-      // dev path: mark paid
+      console.log(`[buy/return] ref=${ref} stub path → markPaid`);
       await markPaid(ref);
     } else {
       try {
         const v = await getPsp().verifyCharge(ref);
-        if (v.status === "succeeded") await markPaid(ref);
-      } catch {}
+        console.log(`[buy/return] ref=${ref} verifyCharge=${v.status}`);
+        if (v.status === "succeeded") {
+          const r = await markPaid(ref);
+          console.log(`[buy/return] ref=${ref} markPaid ok=${r.ok} error=${"error" in r ? r.error : ""}`);
+        }
+      } catch (err) {
+        console.error(`[buy/return] ref=${ref} verifyCharge threw:`, (err as Error).message);
+      }
     }
     const [t] = await getDb()
       .select()
@@ -43,6 +49,8 @@ export default async function ReturnPage({
     if (t) {
       state = t.state as TxnState;
       verified = state === "paid" || state === "dispatched" || state === "delivered" || state === "released" || state === "completed" || state === "payout_pending" || state === "payout_approved";
+    } else {
+      console.warn(`[buy/return] ref=${ref} not found in transactions table`);
     }
   }
 

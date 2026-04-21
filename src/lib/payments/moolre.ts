@@ -66,6 +66,9 @@ async function moolre<T>(
   const status = typeof json.status === "string" ? Number(json.status) : json.status;
   if (!res.ok || status === 0) {
     const msg = Array.isArray(json.message) ? json.message.join(" · ") : json.message;
+    console.error(
+      `[moolre.http] ${init.method} ${path} http=${res.status} envelope=${status} code=${json.code ?? ""} msg=${msg ?? res.statusText}`,
+    );
     throw new Error(`Moolre ${path} failed (code=${json.code ?? res.status}): ${msg ?? res.statusText}`);
   }
 
@@ -180,17 +183,30 @@ export const moolrePsp: PspAdapter = {
           accountnumber: env.MOOLRE_ACCOUNT_NUMBER,
         },
       });
+      const status = mapTxStatus(json.data?.txstatus);
+      console.log(
+        `[moolre.verifyCharge] ref=${reference} status=${status} txstatus=${json.data?.txstatus} amount=${json.data?.amount}`,
+      );
       return {
         reference: json.data?.externalref ?? reference,
-        status: mapTxStatus(json.data?.txstatus),
+        status,
         amount: fromCedis(json.data?.amount),
         channel: "mobile_money",
         raw: json,
       };
-    } catch {
-      // Status endpoint may not exist in all plans; default to pending. Webhook
-      // is the source of truth — the sweep will reconcile on the next tick.
-      return { reference, status: "pending", amount: 0 };
+    } catch (err) {
+      // Surface the failure so ops can see exactly what Moolre said. Keep
+      // returning pending so the UI stays polite, but log the real error.
+      console.error(
+        `[moolre.verifyCharge] ref=${reference} FAILED:`,
+        (err as Error).message,
+      );
+      return {
+        reference,
+        status: "pending",
+        amount: 0,
+        raw: { error: (err as Error).message },
+      };
     }
   },
 

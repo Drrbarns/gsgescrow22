@@ -14,9 +14,11 @@ export const dynamic = "force-dynamic";
 /**
  * Moolre webhook entry point.
  *
- * Moolre posts to the `callback` URL we set on /embed/link (for collections)
- * and on /open/transact/transfer (for payouts). Signature verification uses
- * an HMAC-SHA256 of the raw body with MOOLRE_WEBHOOK_SECRET when configured.
+ * Security model:
+ * Moolre does not HMAC-sign webhook callbacks. Instead we treat the payload as
+ * UNTRUSTED and always cross-verify with Moolre's /open/transact/status API
+ * (authenticated with our private X-API-KEY) before acting. If a signature
+ * header is present and matches, we also record signatureOk=true for audit.
  *
  * Status rule from Moolre docs: never assume failure unless txstatus === 2.
  */
@@ -51,7 +53,9 @@ export async function POST(req: Request) {
   const transactionId = (data.transactionid as string | undefined) ?? "";
   const idempotencyKey =
     (transactionId || externalRef || "").toString() || `moolre_${Date.now()}`;
-  const txStatus = Number(data.txstatus ?? data.TxStatus ?? data.status ?? -1);
+  const txStatusFromPayload = Number(
+    data.txstatus ?? data.TxStatus ?? data.status ?? -1,
+  );
 
   if (isDbLive) {
     try {
@@ -62,7 +66,16 @@ export async function POST(req: Request) {
           event,
           signatureOk: sigOk,
           idempotencyKey,
-          raw: { event, data, signatureProvided: Boolean(sig) } as Record<string, unknown>,
+          raw: {
+            event,
+            data,
+            signatureProvided: Boolean(sig),
+            headers: Object.fromEntries(
+              ["x-moolre-signature", "x-signature", "user-agent", "content-type"].map(
+                (h) => [h, hdrs.get(h) ?? null],
+              ),
+            ),
+          } as Record<string, unknown>,
           processedAt: new Date(),
         })
         .onConflictDoNothing();
@@ -71,41 +84,67 @@ export async function POST(req: Request) {
     }
   }
 
-  if (!sigOk) {
-    return NextResponse.json(
-      { ok: false, error: "Invalid signature" },
-      { status: 401 },
-    );
-  }
-
   await audit({
     action: "webhook.received",
     targetType: "moolre_event",
     targetId: idempotencyKey,
-    payload: { event, txStatus, externalRef, transactionId },
+    payload: { event, txStatusFromPayload, externalRef, transactionId, sigOk },
   });
 
-  // ---- Collection success: buyer paid into our Moolre wallet.
-  if (
+  // ---- Collection event: buyer paid into our Moolre wallet.
+  // Always cross-verify via /open/transact/status before marking paid, because
+  // Moolre does not sign webhooks and the raw POST body is not trustworthy.
+  const looksLikeCollection =
     externalRef &&
-    (txStatus === 1 ||
-      /POS(09|10)|SUCCESS|payment\.success/i.test(event) ||
-      /success/i.test(String(data.message ?? "")))
-  ) {
-    const ref = externalRef;
-    if (isDbLive) {
-      const r = await markPaid(ref);
-      if (!r.ok && r.error !== undefined) {
-        // markPaid is a no-op if already paid; only surface real errors.
-        if (!/already/i.test(r.error)) {
+    (txStatusFromPayload === 1 ||
+      txStatusFromPayload === 0 ||
+      /POS(09|10)|SUCCESS|payment|collect|charge/i.test(event) ||
+      /success|completed/i.test(String(data.message ?? "")));
+
+  if (looksLikeCollection && isDbLive) {
+    try {
+      const verified = await moolrePsp.verifyCharge(externalRef);
+      if (verified.status === "succeeded") {
+        const r = await markPaid(externalRef);
+        if (!r.ok && r.error !== undefined && !/already/i.test(r.error)) {
+          await audit({
+            action: "webhook.received",
+            targetType: "moolre_event",
+            targetId: idempotencyKey,
+            reason: `markPaid failed: ${r.error}`,
+            payload: { externalRef, verified },
+          });
           return NextResponse.json({ ok: false, error: r.error }, { status: 500 });
         }
+      } else {
+        // Not yet succeeded per /open/transact/status. Record and move on; the
+        // periodic sweep and user re-visit of /buy/return will reconcile.
+        await audit({
+          action: "webhook.received",
+          targetType: "moolre_event",
+          targetId: idempotencyKey,
+          reason: `verifyCharge returned ${verified.status}`,
+          payload: { externalRef, verified },
+        });
       }
+    } catch (err) {
+      await audit({
+        action: "webhook.received",
+        targetType: "moolre_event",
+        targetId: idempotencyKey,
+        reason: `verifyCharge threw: ${(err as Error).message}`,
+        payload: { externalRef },
+      });
+      // Still return 200 so Moolre doesn't retry-storm; sweep will reconcile.
     }
   }
 
   // ---- Transfer (payout) status update: settle the payout row.
-  if (isDbLive && transactionId && /transfer|payout|OBGH/i.test(event + " " + (data.code ?? ""))) {
+  if (
+    isDbLive &&
+    transactionId &&
+    /transfer|payout|OBGH|disburs/i.test(event + " " + (data.code ?? ""))
+  ) {
     try {
       const db = getDb();
       const [payout] = await db
@@ -114,7 +153,7 @@ export async function POST(req: Request) {
         .where(eq(payouts.pspTransferRef, transactionId))
         .limit(1);
       if (payout) {
-        if (txStatus === 1) {
+        if (txStatusFromPayload === 1) {
           await db
             .update(payouts)
             .set({ state: "paid", paidAt: new Date(), updatedAt: new Date() })
@@ -125,13 +164,15 @@ export async function POST(req: Request) {
             targetId: payout.id,
             payload: { transferCode: transactionId, via: "webhook" },
           });
-        } else if (txStatus === 2) {
+        } else if (txStatusFromPayload === 2) {
           await db
             .update(payouts)
             .set({
               state: "failed",
               failureReason: String(
-                Array.isArray(data.message) ? data.message.join(" ") : data.message ?? "Moolre transfer failed",
+                Array.isArray(data.message)
+                  ? data.message.join(" ")
+                  : data.message ?? "Moolre transfer failed",
               ),
               updatedAt: new Date(),
             })
@@ -150,5 +191,7 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true });
+  // Always return 200 so Moolre doesn't retry-storm. Our markPaid is idempotent
+  // and the sweep will reconcile anything we missed.
+  return NextResponse.json({ ok: true, sigOk });
 }

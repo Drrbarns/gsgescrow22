@@ -195,11 +195,16 @@ export const moolrePsp: PspAdapter = {
   },
 
   verifyWebhookSignature(rawBody: string, signature: string): boolean {
+    // Moolre does not (currently) HMAC-sign webhook callbacks. Their security
+    // model relies on:
+    //   1. The callback URL being treated as a shared secret, and
+    //   2. Cross-verification via /open/transact/status before acting on the
+    //      payload (see route handler below).
+    // If a signature header IS provided and MOOLRE_WEBHOOK_SECRET is set, we
+    // validate it opportunistically. Otherwise we accept the webhook but the
+    // handler MUST call verifyCharge() before trusting the payload.
     const secret = env.MOOLRE_WEBHOOK_SECRET;
-    // If no signing secret has been provisioned, accept webhooks but mark them
-    // unverified so the webhook handler stores that fact and ops can audit.
-    if (!secret) return true;
-    if (!signature) return false;
+    if (!secret || !signature) return false;
     const hash = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
     try {
       return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature));

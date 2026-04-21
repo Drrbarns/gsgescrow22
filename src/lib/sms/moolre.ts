@@ -19,16 +19,33 @@ function normalize(phone: string): string {
 }
 
 async function call(body: unknown): Promise<MoolreSmsEnvelope> {
-  const key = env.MOOLRE_SMS_VASKEY;
-  if (!key) throw new Error("Moolre SMS not configured: MOOLRE_SMS_VASKEY missing");
+  const user = env.MOOLRE_USERNAME;
+  const vaskey = env.MOOLRE_SMS_VASKEY;
+  const pubkey = env.MOOLRE_PUBLIC_KEY;
+  const privkey = env.MOOLRE_API_KEY;
+
+  if (!user) {
+    throw new Error("Moolre SMS not configured: MOOLRE_USERNAME missing");
+  }
+  if (!vaskey && !pubkey && !privkey) {
+    throw new Error(
+      "Moolre SMS not configured: need MOOLRE_SMS_VASKEY (or MOOLRE_PUBLIC_KEY / MOOLRE_API_KEY)",
+    );
+  }
+
   const headers: Record<string, string> = {
-    "X-API-VASKEY": key,
+    "X-API-USER": user,
     "Content-Type": "application/json",
     Accept: "application/json",
   };
+  if (vaskey) headers["X-API-VASKEY"] = vaskey;
+  else if (privkey) headers["X-API-KEY"] = privkey;
+  else if (pubkey) headers["X-API-PUBKEY"] = pubkey;
+
   if (env.MOOLRE_SMS_SCENARIO) {
     headers["X-Scenario-Key"] = env.MOOLRE_SMS_SCENARIO;
   }
+
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers,
@@ -44,7 +61,9 @@ async function call(body: unknown): Promise<MoolreSmsEnvelope> {
   }
   const status = typeof json.status === "string" ? Number(json.status) : json.status;
   if (!res.ok || status !== 1) {
-    throw new Error(`Moolre SMS failed (code=${json.code ?? res.status}): ${json.message ?? res.statusText}`);
+    const code = json.code ?? res.status;
+    const msg = json.message ?? res.statusText;
+    throw new Error(`Moolre SMS failed (code=${code}): ${msg}`);
   }
   return json;
 }

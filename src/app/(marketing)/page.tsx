@@ -55,18 +55,18 @@ function CounterStrip() {
   );
 }
 
-const HERO_IMAGE = "/hero/hero-portrait.jpg";
+const HERO_IMAGE = "/hero/hero-portrait.png";
 
 function Hero() {
   return (
     <section className="relative overflow-hidden min-h-[560px] sm:min-h-[680px] lg:min-h-[760px] flex items-center -mt-px">
       <Image
         src={HERO_IMAGE}
-        alt="Ghanaian seller wearing a violet ankara-print top"
+        alt="Confident professional using a smartphone"
         fill
         priority
         sizes="100vw"
-        className="object-cover object-[72%_32%]"
+        className="object-cover object-center"
       />
       <div
         aria-hidden

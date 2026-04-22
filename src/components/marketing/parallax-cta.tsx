@@ -4,7 +4,7 @@ import { useRef } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-const CTA_IMAGE = "/hero/cta-parallax.jpg";
+const CTA_IMAGE = "/hero/cta-parallax.png";
 
 export function ParallaxCtaBackground({
   targetRef,
@@ -31,7 +31,7 @@ export function ParallaxCtaBackground({
         fill
         sizes="100vw"
         priority={false}
-        className="object-cover object-[55%_center]"
+        className="object-cover object-center"
       />
     </motion.div>
   );

@@ -7,7 +7,7 @@ const HERO_IMAGE =
 
 export function MarketplaceHero() {
   return (
-    <section className="relative overflow-hidden min-h-[420px] lg:min-h-[520px] flex items-center">
+    <section className="relative overflow-hidden min-h-[360px] sm:min-h-[420px] lg:min-h-[520px] flex items-center">
       <Image
         src={HERO_IMAGE}
         alt="Verified sellers across Ghana"
@@ -30,23 +30,23 @@ export function MarketplaceHero() {
         style={{ background: "radial-gradient(closest-side, rgba(124,58,237,0.5), transparent 70%)" }}
       />
 
-      <Container size="wide" className="relative z-10 py-20 sm:py-24 pb-28 sm:pb-32">
+      <Container size="wide" className="relative z-10 py-14 sm:py-24 pb-28 sm:pb-32">
         <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 backdrop-blur-md px-3 py-1.5 text-[12.5px] font-medium text-white/95">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 backdrop-blur-md px-3 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-white/95">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#A78BFA]/90 text-[#1a1033]">
               <ShieldCheck size={12} strokeWidth={3} />
             </span>
             Secure Payment Marketplace
           </span>
-          <h1 className="mt-6 font-display text-[44px] sm:text-[64px] lg:text-[76px] leading-[1.02] font-bold tracking-[-0.02em] text-white text-balance">
+          <h1 className="mt-5 sm:mt-6 font-display text-[36px] sm:text-[60px] lg:text-[76px] leading-[1.05] sm:leading-[1.02] font-bold tracking-[-0.02em] text-white text-balance">
             Products &amp; Services
           </h1>
-          <p className="mt-5 text-[17px] sm:text-lg text-white/75 max-w-xl leading-relaxed">
+          <p className="mt-4 sm:mt-5 text-[15px] sm:text-lg text-white/75 max-w-xl leading-relaxed">
             Discover verified seller listings and purchase through our secure
             payment protection flow. Your money is protected until delivery is
             confirmed.
           </p>
-          <div className="mt-8 flex items-center gap-5 text-xs text-white/70">
+          <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/70">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck size={14} className="text-[#A78BFA]" /> KYC&rsquo;d sellers
             </span>

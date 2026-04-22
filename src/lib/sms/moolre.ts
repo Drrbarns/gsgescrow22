@@ -25,6 +25,19 @@ function mask(s: string | undefined): string {
 }
 
 /**
+ * Moolre requires a non-empty `ref` on every message. If the caller didn't
+ * supply one, mint a short unique ref so the send never fails validation.
+ */
+function ensureRef(ref: string | undefined): string {
+  if (ref && ref.trim().length > 0) return ref.trim();
+  const uuid =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID().replace(/-/g, "")
+      : Math.random().toString(36).slice(2) + Date.now().toString(36);
+  return `sbbs-${uuid.slice(0, 20)}`;
+}
+
+/**
  * Moolre SMS uses ONLY X-API-VASKEY for auth (per the /open/sms/send docs).
  * No X-API-USER, no X-API-ACCOUNT, no X-API-KEY needed here — those belong
  * to the payments API. An AIN01 response means the VASKEY value itself is
@@ -80,9 +93,7 @@ async function call(body: unknown): Promise<MoolreSmsEnvelope> {
     const hint =
       code === "AIN01"
         ? " — the VASKEY is invalid or SMS VAS is not activated on your Moolre account"
-        : code === "ASMS07"
-          ? ` — sender ID "${env.MOOLRE_SMS_SENDER_ID}" not approved by Moolre`
-          : "";
+        : "";
     throw new Error(`Moolre SMS failed (code=${code}): ${msg}${hint}`);
   }
   return json;
@@ -93,6 +104,7 @@ export const moolreSms: SmsAdapter = {
 
   async send(msg: SmsMessage): Promise<SmsResult> {
     try {
+      const ref = ensureRef(msg.ref);
       const json = await call({
         type: 1,
         senderid: env.MOOLRE_SMS_SENDER_ID,
@@ -100,7 +112,7 @@ export const moolreSms: SmsAdapter = {
           {
             recipient: normalize(msg.to),
             message: msg.body,
-            ref: msg.ref ?? "",
+            ref,
           },
         ],
       });
@@ -123,13 +135,14 @@ export const moolreSms: SmsAdapter = {
     try {
       // Moolre accepts an array of messages in a single call — cheaper + faster
       // than N round-trips when fanning out to both parties.
+      const withRefs = msgs.map((m) => ({ ...m, ref: ensureRef(m.ref) }));
       const json = await call({
         type: 1,
         senderid: env.MOOLRE_SMS_SENDER_ID,
-        messages: msgs.map((m) => ({
+        messages: withRefs.map((m) => ({
           recipient: normalize(m.to),
           message: m.body,
-          ref: m.ref ?? "",
+          ref: m.ref,
         })),
       });
       // The docs don't fully specify per-message results; on status=1 we treat
@@ -139,7 +152,7 @@ export const moolreSms: SmsAdapter = {
       return {
         ok: true,
         provider: "moolre",
-        results: msgs.map((m) => ({
+        results: withRefs.map((m) => ({
           ok: true,
           providerMessageId: batchId || m.ref,
           provider: "moolre",

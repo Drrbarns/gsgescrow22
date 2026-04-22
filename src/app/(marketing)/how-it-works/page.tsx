@@ -201,7 +201,7 @@ function Comparison({
     <Card
       className={
         isGood
-          ? "p-6 lg:p-8 bg-[var(--primary-soft)] border-[#bcd9c6]"
+          ? "p-6 lg:p-8 bg-[var(--primary-soft)] border-[var(--border-strong)]"
           : "p-6 lg:p-8"
       }
     >

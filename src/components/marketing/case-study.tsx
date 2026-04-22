@@ -20,10 +20,10 @@ export function CaseStudy({
 }) {
   const accentMap = {
     neutral:
-      "bg-gradient-to-br from-[var(--primary)] to-[#0a3a23] text-[var(--primary-foreground)]",
+      "bg-gradient-to-br from-[var(--primary)] via-purple-700 to-indigo-700 text-[var(--primary-foreground)]",
     accent:
-      "bg-gradient-to-br from-[var(--accent)] to-[#9a7424] text-[var(--accent-foreground)]",
-    warning: "bg-gradient-to-br from-[#cd8e12] to-[#6f4c04] text-white",
+      "bg-gradient-to-br from-[var(--accent)] to-[var(--primary)] text-[var(--accent-foreground)]",
+    warning: "bg-gradient-to-br from-violet-500 to-blue-600 text-white",
   } as const;
 
   const initial = persona

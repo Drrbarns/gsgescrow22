@@ -102,7 +102,7 @@ export default async function ListingDetail({
                     className="absolute inset-0 h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-[var(--muted)] font-display text-6xl">
+                  <div className="absolute inset-0 flex items-center justify-center text-[var(--muted)] font-display text-5xl sm:text-6xl">
                     {row.title.slice(0, 1).toUpperCase()}
                   </div>
                 )}
@@ -114,7 +114,7 @@ export default async function ListingDetail({
               </div>
             </Card>
             {extras.length > 0 && (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
                 {extras.map((src, i) => (
                   <Card key={i} className="overflow-hidden">
                     <div className="aspect-square bg-[var(--surface-muted)]">
@@ -201,7 +201,7 @@ export default async function ListingDetail({
             <Card className="p-6">
               <p className="text-xs uppercase tracking-[0.14em] font-semibold text-[var(--muted)]">Sold by</p>
               <div className="mt-3 flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-[#0a3a23] text-white flex items-center justify-center font-display font-bold">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-indigo-700 text-white flex items-center justify-center font-display font-bold">
                   {(row.sellerName ?? row.sellerHandle ?? "?").slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">

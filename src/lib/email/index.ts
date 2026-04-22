@@ -56,28 +56,28 @@ function htmlToText(html: string): string {
 
 const baseStyle = `
 <style>
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;line-height:1.55;color:#0c1410;background:#fbfaf6;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;line-height:1.55;color:#1A1424;background:#FBFAFC;margin:0;padding:0}
   .wrap{max-width:560px;margin:0 auto;padding:32px 20px}
-  .card{background:#fff;border:1px solid #e6e2d7;border-radius:16px;padding:32px;box-shadow:0 1px 0 #00000008,0 12px 40px -24px #0c14102a}
-  .brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:14px;color:#0F5132;letter-spacing:.04em}
-  .brand .mark{width:28px;height:28px;border-radius:8px;background:#0F5132;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;position:relative}
-  .brand .mark::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#C89A3A;border:2px solid #fff}
+  .card{background:#fff;border:1px solid #DCD6E3;border-radius:16px;padding:32px;box-shadow:0 1px 0 #00000008,0 12px 40px -24px rgba(79,43,184,0.25)}
+  .brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:14px;color:#4F2BB8;letter-spacing:.04em}
+  .brand .mark{width:28px;height:28px;border-radius:8px;background:#4F2BB8;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;position:relative}
+  .brand .mark::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#8B5CF6;border:2px solid #fff}
   h1{font-size:26px;line-height:1.15;margin:20px 0 8px;font-weight:800;letter-spacing:-.01em}
-  .muted{color:#6b7367;font-size:14px}
-  .ref{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f1ea;padding:4px 10px;border-radius:6px;font-size:13px;margin-top:8px}
+  .muted{color:#6E6680;font-size:14px}
+  .ref{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#EEEBF1;padding:4px 10px;border-radius:6px;font-size:13px;margin-top:8px}
   table{width:100%;margin:20px 0;border-collapse:collapse}
-  td{padding:8px 0;border-bottom:1px dashed #e6e2d7;font-size:14px;vertical-align:top}
-  td.l{color:#6b7367}
+  td{padding:8px 0;border-bottom:1px dashed #DCD6E3;font-size:14px;vertical-align:top}
+  td.l{color:#6E6680}
   td.r{text-align:right;font-weight:600}
-  .total td{border-top:1px solid #d8d2c2;border-bottom:0;padding-top:14px;font-size:16px;font-weight:800}
-  .btn{display:inline-block;background:#0F5132;color:#fff!important;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:600;margin-top:12px}
-  .btn.accent{background:#C89A3A;color:#1a1407!important}
-  .pill{display:inline-block;background:#e6f1ea;color:#0F5132;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em}
-  .pill.warn{background:#fbf2dd;color:#7a5410}
-  .pill.danger{background:#fbe5e3;color:#b3241f}
-  .footer{color:#6b7367;font-size:12px;text-align:center;margin-top:24px;line-height:1.7}
-  .footer a{color:#6b7367;text-decoration:underline}
-  .divider{height:1px;background:#e6e2d7;margin:20px 0}
+  .total td{border-top:1px solid #C7BFD1;border-bottom:0;padding-top:14px;font-size:16px;font-weight:800}
+  .btn{display:inline-block;background:#4F2BB8;color:#fff!important;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:600;margin-top:12px}
+  .btn.accent{background:#8B5CF6;color:#fff!important}
+  .pill{display:inline-block;background:#E9E4F0;color:#3A1F75;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em}
+  .pill.warn{background:#FBF2DD;color:#7A5410}
+  .pill.danger{background:#FBE5E3;color:#B3241F}
+  .footer{color:#6E6680;font-size:12px;text-align:center;margin-top:24px;line-height:1.7}
+  .footer a{color:#6E6680;text-decoration:underline}
+  .divider{height:1px;background:#DCD6E3;margin:20px 0}
 </style>
 `;
 
@@ -114,7 +114,7 @@ export function dispatchedEmail(args: { ref: string; deliveryCode: string; itemD
     `<span class="pill warn">Out for delivery</span>
      <h1>Your order is on the way.</h1>
      <p class="muted">${args.sellerName} has dispatched <strong>${escape(args.itemDescription)}</strong>. Inspect the goods first, then release the code below to the rider. Only release when you're satisfied.</p>
-     <div style="font-family:ui-monospace,Menlo,monospace;font-size:36px;font-weight:800;letter-spacing:.3em;text-align:center;margin:24px 0;padding:16px;background:#f7ecd2;border-radius:12px;color:#7a5410">${args.deliveryCode}</div>
+     <div style="font-family:ui-monospace,Menlo,monospace;font-size:36px;font-weight:800;letter-spacing:.3em;text-align:center;margin:24px 0;padding:16px;background:#E9E4F0;border-radius:12px;color:#3A1F75">${args.deliveryCode}</div>
      <p class="muted">If something is wrong at the door, open a dispute from your Hub — don't hand over the code.</p>
      <a class="btn" href="${env.NEXT_PUBLIC_APP_URL}/hub/transactions/${args.ref}">Open in Hub</a>`,
     `Your SBBS order ${args.ref} has been dispatched`,

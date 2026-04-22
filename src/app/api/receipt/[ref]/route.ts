@@ -11,19 +11,19 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const styles = StyleSheet.create({
-  page: { padding: 48, fontSize: 11, fontFamily: "Helvetica", color: "#0c1410" },
-  brand: { fontSize: 18, fontFamily: "Helvetica-Bold", color: "#0F5132", marginBottom: 4 },
-  sub: { fontSize: 10, color: "#6b7367" },
+  page: { padding: 48, fontSize: 11, fontFamily: "Helvetica", color: "#1A1424" },
+  brand: { fontSize: 18, fontFamily: "Helvetica-Bold", color: "#4F2BB8", marginBottom: 4 },
+  sub: { fontSize: 10, color: "#6E6680" },
   ref: { fontSize: 22, fontFamily: "Courier-Bold", marginTop: 24 },
-  hr: { borderBottom: "1pt solid #d8d2c2", marginVertical: 16 },
+  hr: { borderBottom: "1pt solid #C7BFD1", marginVertical: 16 },
   row: { flexDirection: "row", justifyContent: "space-between", marginVertical: 3 },
-  label: { color: "#6b7367", fontSize: 10 },
+  label: { color: "#6E6680", fontSize: 10 },
   value: { fontSize: 11 },
   total: { fontSize: 16, fontFamily: "Helvetica-Bold" },
   section: { marginTop: 20 },
-  sectionTitle: { fontSize: 11, fontFamily: "Helvetica-Bold", color: "#0F5132", marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.4 },
-  badge: { backgroundColor: "#e6f1ea", color: "#0F5132", padding: 6, fontSize: 9, alignSelf: "flex-start" },
-  footer: { marginTop: 36, paddingTop: 16, borderTop: "1pt solid #e6e2d7", fontSize: 9, color: "#6b7367" },
+  sectionTitle: { fontSize: 11, fontFamily: "Helvetica-Bold", color: "#4F2BB8", marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.4 },
+  badge: { backgroundColor: "#E9E4F0", color: "#3A1F75", padding: 6, fontSize: 9, alignSelf: "flex-start" },
+  footer: { marginTop: 36, paddingTop: 16, borderTop: "1pt solid #DCD6E3", fontSize: 9, color: "#6E6680" },
 });
 
 export async function GET(

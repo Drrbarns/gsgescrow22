@@ -7,10 +7,10 @@ type Tone = "neutral" | "info" | "success" | "warning" | "danger" | "accent";
 const TONE_CLASSES: Record<Tone, string> = {
   neutral: "bg-[var(--surface-muted)] text-[var(--foreground)] border-[var(--border-strong)]",
   info: "bg-[#e8f1f8] text-[#1f4a72] border-[#bcd6ea]",
-  success: "bg-[var(--primary-soft)] text-[var(--primary)] border-[#bcd9c6]",
+  success: "bg-[var(--primary-soft)] text-[var(--primary)] border-[var(--border-strong)]",
   warning: "bg-[#fbf2dd] text-[#7a5410] border-[#ecdba8]",
   danger: "bg-[#fbe5e3] text-[var(--danger)] border-[#f1bbb6]",
-  accent: "bg-[var(--accent-soft)] text-[var(--accent-foreground)] border-[#e7d3a4]",
+  accent: "bg-[var(--accent-soft)] text-[var(--accent-foreground)] border-[var(--border-strong)]",
 };
 
 export function Badge({

@@ -31,7 +31,7 @@ export function MarketingNav() {
       className={cn(
         "sticky top-0 z-40 backdrop-blur-xl transition-all duration-300 border-b",
         scrolled
-          ? "bg-[color-mix(in_srgb,var(--background)_85%,transparent)] border-[var(--border)] shadow-[0_1px_0_#00000006,0_10px_30px_-16px_#0c141012]"
+          ? "bg-[color-mix(in_srgb,var(--background)_85%,transparent)] border-[var(--border)] shadow-[0_1px_0_#00000006,0_10px_30px_-16px_rgba(26,20,36,0.08)]"
           : "bg-[color-mix(in_srgb,var(--background)_80%,transparent)] border-transparent",
       )}
     >

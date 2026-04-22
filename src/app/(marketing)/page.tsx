@@ -14,6 +14,9 @@ import {
   Quote,
   UserCheck,
   Store,
+  Camera,
+  Clock,
+  CheckCheck,
 } from "lucide-react";
 import { Container, Section, Eyebrow } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
@@ -23,7 +26,7 @@ import { ReviewMarquee } from "@/components/marketing/review-marquee";
 import { CaseStudy } from "@/components/marketing/case-study";
 import { TickerStrip } from "@/components/marketing/ticker-strip";
 import { Reveal, Stagger, StaggerItem } from "@/components/fx/reveal";
-import { CountUp } from "@/components/fx/count-up";
+import { ParallaxCtaSection } from "@/components/marketing/parallax-cta";
 
 export default function HomePage() {
   return (
@@ -52,23 +55,18 @@ function CounterStrip() {
   );
 }
 
-/**
- * Hero image. Drop a file at /public/hero.jpg and switch HERO_IMAGE to "/hero.jpg"
- * to use your own brand photo (recommended for launch).
- */
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=2400&q=80";
+const HERO_IMAGE = "/hero/hero-portrait.jpg";
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden min-h-[680px] lg:min-h-[760px] flex items-center -mt-px">
+    <section className="relative overflow-hidden min-h-[560px] sm:min-h-[680px] lg:min-h-[760px] flex items-center -mt-px">
       <Image
         src={HERO_IMAGE}
-        alt="Ghanaian entrepreneur using SBBS on her phone"
+        alt="Ghanaian seller wearing a violet ankara-print top"
         fill
         priority
         sizes="100vw"
-        className="object-cover object-[65%_center]"
+        className="object-cover object-[72%_32%]"
       />
       <div
         aria-hidden
@@ -79,10 +77,10 @@ function Hero() {
         className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,12,22,0.55)_0%,transparent_30%,transparent_75%,rgba(10,12,22,0.65)_100%)]"
       />
 
-      <Container size="wide" className="relative z-10 py-20 sm:py-28 lg:py-32">
+      <Container size="wide" className="relative z-10 py-14 sm:py-28 lg:py-32">
         <div className="max-w-2xl">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 backdrop-blur-md px-3 py-1.5 text-[12.5px] font-medium text-white/95">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 backdrop-blur-md px-3 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-white/95">
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#4ADE80]/90 text-[#0b2a16]">
                 <ShieldCheck size={12} strokeWidth={3} />
               </span>
@@ -91,29 +89,29 @@ function Hero() {
           </Reveal>
 
           <Reveal index={1}>
-            <h1 className="mt-6 font-display text-[44px] sm:text-[60px] lg:text-[72px] leading-[1.02] font-bold tracking-[-0.02em] text-white text-balance">
+            <h1 className="mt-5 sm:mt-6 font-display text-[34px] sm:text-[56px] lg:text-[72px] leading-[1.05] sm:leading-[1.02] font-bold tracking-[-0.02em] text-white text-balance">
               Secure Every Transaction.
-              <br />
+              <br className="hidden sm:block" />{" "}
               Protect Every Deal.
             </h1>
           </Reveal>
 
           <Reveal index={2}>
-            <p className="mt-6 text-[17px] sm:text-lg text-white/80 max-w-xl leading-relaxed">
+            <p className="mt-5 sm:mt-6 text-[15px] sm:text-lg text-white/80 max-w-xl leading-relaxed">
               Buy and sell confidently across social media, websites, and
               digital channels. Funds stay protected until delivery is confirmed.
             </p>
           </Reveal>
 
           <Reveal index={3}>
-            <div className="mt-9 flex flex-col sm:flex-row gap-3">
-              <Link href="/buy">
+            <div className="mt-7 sm:mt-9 flex flex-col sm:flex-row gap-3">
+              <Link href="/buy" className="w-full sm:w-auto">
                 <Button size="lg" variant="violet" className="w-full sm:w-auto rounded-full px-7">
                   <UserCheck size={18} />
                   Start as Buyer
                 </Button>
               </Link>
-              <Link href="/sell">
+              <Link href="/sell" className="w-full sm:w-auto">
                 <Button size="lg" variant="violet-outline" className="w-full sm:w-auto rounded-full px-7">
                   <Store size={18} />
                   Start as Seller
@@ -123,7 +121,7 @@ function Hero() {
           </Reveal>
 
           <Reveal index={4}>
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/70">
+            <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-x-5 sm:gap-x-6 gap-y-3 text-sm text-white/70">
               <TrustPill icon={Lock} label="Funds held by Moolre" />
               <TrustPill icon={BadgeCheck} label="KYC'd sellers" />
               <TrustPill icon={Gavel} label="Real human dispute review" />
@@ -290,12 +288,12 @@ function PromiseSection() {
     <Section className="relative overflow-hidden bg-[var(--foreground)] text-white">
       <div className="absolute inset-0 bg-grid-dots opacity-20" />
       <div
-        className="absolute top-0 right-[-10%] h-[600px] w-[600px] rounded-full opacity-25 blur-3xl animate-aurora"
-        style={{ background: "radial-gradient(closest-side, rgba(200,154,58,0.7), transparent 70%)" }}
+        className="absolute top-0 right-[-10%] h-[600px] w-[600px] rounded-full opacity-30 blur-3xl animate-aurora"
+        style={{ background: "radial-gradient(closest-side, rgba(139,92,246,0.55), transparent 70%)" }}
       />
       <div
-        className="absolute bottom-[-20%] left-[-10%] h-[500px] w-[500px] rounded-full opacity-25 blur-3xl animate-aurora"
-        style={{ animationDelay: "-10s", background: "radial-gradient(closest-side, rgba(15,81,50,0.9), transparent 70%)" }}
+        className="absolute bottom-[-20%] left-[-10%] h-[500px] w-[500px] rounded-full opacity-30 blur-3xl animate-aurora"
+        style={{ animationDelay: "-10s", background: "radial-gradient(closest-side, rgba(79,43,184,0.8), transparent 70%)" }}
       />
 
       <Container size="wide" className="relative">
@@ -343,38 +341,26 @@ function PromiseSection() {
 
           <div className="lg:col-span-6 lg:pl-8">
             <Reveal index={2}>
-              <div className="grid grid-cols-2 gap-4">
-                <PromiseTile
-                  big={<CountUp to={5} />}
-                  unit="business days"
-                  label="Published dispute SLA"
-                />
-                <PromiseTile
-                  big={<CountUp to={72} />}
-                  unit="hours"
-                  label="Auto-release safety net"
-                />
-                <PromiseTile
-                  big={<CountUp to={100} suffix="%" />}
-                  unit="refunds"
-                  label="To original payment method"
-                />
-                <PromiseTile
-                  big={<CountUp to={0} />}
-                  unit="funds touched"
-                  label="By SBBS staff, ever"
-                />
-              </div>
+              <DisputeTicket />
             </Reveal>
 
             <Reveal index={3}>
-              <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                <Quote size={20} className="text-[var(--accent)]" />
-                <p className="mt-3 text-[17px] leading-relaxed text-white/90">
-                  &ldquo;Bottle arrived half-empty. I opened a dispute, uploaded a
-                  photo, got refunded in three days. SBBS is the real one.&rdquo;
-                </p>
-                <p className="mt-4 text-sm text-white/60">Akosua, 31 · Tema — real dispute outcome</p>
+              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-white/55">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-1 w-1 rounded-full bg-[var(--accent)]" />
+                  Median resolve time
+                  <span className="font-semibold text-white/85">2.3 days</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-1 w-1 rounded-full bg-[var(--accent)]" />
+                  Refunds to original method
+                  <span className="font-semibold text-white/85">100%</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-1 w-1 rounded-full bg-[var(--accent)]" />
+                  Funds touched by SBBS staff
+                  <span className="font-semibold text-white/85">0, ever</span>
+                </span>
               </div>
             </Reveal>
           </div>
@@ -384,26 +370,144 @@ function PromiseSection() {
   );
 }
 
-function PromiseTile({
-  big,
-  unit,
-  label,
+function DisputeTicket() {
+  return (
+    <div className="relative rounded-[24px] sm:rounded-[28px] border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-5 sm:p-7 backdrop-blur-xl shadow-[0_30px_80px_-20px_rgba(79,43,184,0.45)]">
+      {/* Top bar: dispute ID + status */}
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4 sm:pb-5">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
+            <Gavel size={16} className="text-[var(--accent)]" />
+          </span>
+          <div className="leading-tight">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">Dispute</p>
+            <p className="font-mono text-[13px] text-white/90">#SB-23K7-Y49P</p>
+          </div>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300 ring-1 ring-emerald-400/30">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-glow" />
+          Resolved
+        </span>
+      </div>
+
+      {/* Amount + parties */}
+      <div className="mt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">Order value</p>
+          <p className="mt-1 font-display text-3xl font-bold tracking-tight">
+            GH₵ 180<span className="text-white/40 text-xl">.00</span>
+          </p>
+        </div>
+        <div className="sm:text-right">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">Buyer vs. Seller</p>
+          <p className="mt-1 text-[13px] text-white/80">
+            Akosua&nbsp;O. <span className="text-white/40">↔</span> @perfume.gh
+          </p>
+        </div>
+      </div>
+
+      {/* Timeline */}
+      <ol className="relative mt-7 space-y-5 pl-7">
+        <span
+          aria-hidden
+          className="absolute left-[11px] top-2 bottom-2 w-px bg-gradient-to-b from-[var(--accent)]/60 via-white/20 to-white/5"
+        />
+        <TimelineRow
+          icon={<Camera size={11} strokeWidth={2.5} />}
+          time="Day 1 · 14:32"
+          title="Buyer opens dispute"
+          body={
+            <span className="text-white/70">
+              <span className="text-white/90">&ldquo;Bottle arrived half-empty.&rdquo;</span>
+              <span className="ml-2 inline-flex items-center gap-1 rounded-md bg-white/8 px-1.5 py-0.5 text-[10px] text-white/60 ring-1 ring-white/10">
+                <Camera size={10} /> 3 photos
+              </span>
+            </span>
+          }
+        />
+        <TimelineRow
+          icon={<Lock size={11} strokeWidth={2.5} />}
+          time="Day 1 · 14:32"
+          title="Funds auto-frozen at PSP"
+          body={<span className="text-white/60">No SBBS staff can move this money.</span>}
+          muted
+        />
+        <TimelineRow
+          icon={<UserCheck size={11} strokeWidth={2.5} />}
+          time="Day 1 · 17:58"
+          title="Reviewer assigned"
+          body={
+            <span className="inline-flex items-center gap-2 text-white/75">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary)] to-indigo-600 text-[10px] font-bold text-white">
+                AO
+              </span>
+              Akua O. · SBBS Trust Team
+            </span>
+          }
+        />
+        <TimelineRow
+          icon={<CheckCheck size={11} strokeWidth={2.5} />}
+          time="Day 3 · 11:04"
+          title="Refund issued to MoMo"
+          body={
+            <span className="text-white/75">
+              GH₵ 180.00 returned — same wallet used at checkout.
+            </span>
+          }
+          highlight
+        />
+      </ol>
+
+      {/* Footer — human quote, but woven into the artifact */}
+      <div className="mt-7 flex items-start gap-3 border-t border-white/10 pt-5">
+        <Quote size={16} className="text-[var(--accent)] shrink-0 mt-1" />
+        <p className="text-[13px] leading-relaxed text-white/75">
+          <span className="text-white/90">&ldquo;Three days, full refund, zero drama.&rdquo;</span>{" "}
+          <span className="text-white/50">— Akosua, 31 · Tema</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function TimelineRow({
+  icon,
+  time,
+  title,
+  body,
+  highlight,
+  muted,
 }: {
-  big: React.ReactNode;
-  unit: string;
-  label: string;
+  icon: React.ReactNode;
+  time: string;
+  title: string;
+  body: React.ReactNode;
+  highlight?: boolean;
+  muted?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-      <p className="font-display font-bold text-5xl leading-none tracking-tight">
-        {big}
-        <span className="text-[var(--accent)]">.</span>
-      </p>
-      <p className="mt-2 text-xs uppercase tracking-[0.18em] font-semibold text-white/60">
-        {unit}
-      </p>
-      <p className="mt-3 text-sm text-white/80 leading-snug">{label}</p>
-    </div>
+    <li className="relative">
+      <span
+        aria-hidden
+        className={
+          "absolute -left-7 top-0.5 inline-flex h-[22px] w-[22px] items-center justify-center rounded-full ring-2 ring-[var(--foreground)] " +
+          (highlight
+            ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
+            : muted
+            ? "bg-white/10 text-white/60"
+            : "bg-white/15 text-white/85")
+        }
+      >
+        {icon}
+      </span>
+      <div className="flex items-baseline gap-2">
+        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.18em] font-semibold text-white/45">
+          <Clock size={10} /> {time}
+        </span>
+      </div>
+      <p className="mt-0.5 text-[14px] font-semibold text-white/95">{title}</p>
+      <p className="mt-1 text-[13px] leading-relaxed">{body}</p>
+    </li>
   );
 }
 
@@ -590,18 +694,8 @@ function Reviews() {
 
 function FinalCta() {
   return (
-    <section className="relative overflow-hidden bg-[var(--foreground)] text-white py-24 sm:py-36">
-      <div className="absolute inset-0 bg-grid-dots opacity-10" />
-      <div
-        className="absolute top-[-20%] left-[-10%] h-[600px] w-[600px] rounded-full opacity-40 blur-3xl animate-aurora"
-        style={{ background: "radial-gradient(closest-side, rgba(200,154,58,0.45), transparent 70%)" }}
-      />
-      <div
-        className="absolute bottom-[-20%] right-[-10%] h-[700px] w-[700px] rounded-full opacity-50 blur-3xl animate-aurora"
-        style={{ animationDelay: "-12s", background: "radial-gradient(closest-side, rgba(15,81,50,0.8), transparent 70%)" }}
-      />
-
-      <Container size="wide" className="relative">
+    <ParallaxCtaSection>
+      <Container size="wide" className="relative z-10">
         <div className="text-center max-w-5xl mx-auto">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 backdrop-blur px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80">
@@ -638,6 +732,6 @@ function FinalCta() {
           </Reveal>
         </div>
       </Container>
-    </section>
+    </ParallaxCtaSection>
   );
 }

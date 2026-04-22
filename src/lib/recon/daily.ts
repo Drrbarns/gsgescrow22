@@ -313,30 +313,30 @@ function renderReportHtml(report: ReconReport): string {
     .map(
       (f) => `
         <tr>
-          <td style="padding:8px 12px;border-bottom:1px dashed #e6e2d7">
+          <td style="padding:8px 12px;border-bottom:1px dashed #DCD6E3">
             <span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;background:${severityColor(f.severity).bg};color:${severityColor(f.severity).fg}">${f.severity}</span>
           </td>
-          <td style="padding:8px 12px;border-bottom:1px dashed #e6e2d7;font-family:ui-monospace,Menlo,monospace;font-size:12px">${escape(f.ref)}</td>
-          <td style="padding:8px 12px;border-bottom:1px dashed #e6e2d7;font-size:13px">${escape(f.message)}</td>
+          <td style="padding:8px 12px;border-bottom:1px dashed #DCD6E3;font-family:ui-monospace,Menlo,monospace;font-size:12px">${escape(f.ref)}</td>
+          <td style="padding:8px 12px;border-bottom:1px dashed #DCD6E3;font-size:13px">${escape(f.message)}</td>
         </tr>`,
     )
     .join("");
 
   const empty = `
-    <tr><td colspan="3" style="padding:18px;text-align:center;color:#6b7367;font-size:13px">
+    <tr><td colspan="3" style="padding:18px;text-align:center;color:#6E6680;font-size:13px">
       Nothing to investigate. All payments + payouts reconcile cleanly.
     </td></tr>`;
 
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-  <body style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;margin:0;padding:0;background:#fbfaf6;color:#0c1410">
+  <body style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;margin:0;padding:0;background:#FBFAFC;color:#1A1424">
     <div style="max-width:640px;margin:0 auto;padding:32px 20px">
-      <div style="display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:14px;color:#0F5132;letter-spacing:.04em">
-        <span style="width:28px;height:28px;border-radius:8px;background:#0F5132;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;position:relative">SB</span>
+      <div style="display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:14px;color:#4F2BB8;letter-spacing:.04em">
+        <span style="width:28px;height:28px;border-radius:8px;background:#4F2BB8;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;position:relative">SB</span>
         SELL-SAFE BUY-SAFE · DAILY RECON
       </div>
-      <div style="background:#fff;border:1px solid #e6e2d7;border-radius:16px;padding:28px;margin-top:20px;box-shadow:0 1px 0 #00000008,0 12px 40px -24px #0c14102a">
+      <div style="background:#fff;border:1px solid #DCD6E3;border-radius:16px;padding:28px;margin-top:20px;box-shadow:0 1px 0 #00000008,0 12px 40px -24px rgba(79,43,184,0.25)">
         <h1 style="font-size:24px;line-height:1.15;margin:0 0 8px;font-weight:800;letter-spacing:-.01em">Daily reconciliation</h1>
-        <p style="color:#6b7367;font-size:13px;margin:0">${new Date(report.windowStart).toLocaleString("en-GH")} → ${new Date(report.windowEnd).toLocaleString("en-GH")} · ran in ${report.durationMs}ms</p>
+        <p style="color:#6E6680;font-size:13px;margin:0">${new Date(report.windowStart).toLocaleString("en-GH")} → ${new Date(report.windowEnd).toLocaleString("en-GH")} · ran in ${report.durationMs}ms</p>
 
         <div style="display:flex;gap:10px;margin:20px 0 10px;flex-wrap:wrap">
           ${severityPill("critical", report.summary.critical)}
@@ -344,20 +344,20 @@ function renderReportHtml(report: ReconReport): string {
           ${severityPill("info", report.summary.info)}
         </div>
 
-        <p style="color:#6b7367;font-size:12px;margin:18px 0 6px;text-transform:uppercase;letter-spacing:.14em;font-weight:600">Coverage</p>
+        <p style="color:#6E6680;font-size:12px;margin:18px 0 6px;text-transform:uppercase;letter-spacing:.14em;font-weight:600">Coverage</p>
         <table style="width:100%;font-size:13px;border-collapse:collapse">
-          <tr><td style="padding:4px 0;color:#6b7367">Transactions scanned</td><td style="padding:4px 0;text-align:right;font-weight:700">${report.counts.transactionsScanned}</td></tr>
-          <tr><td style="padding:4px 0;color:#6b7367">Payouts scanned</td><td style="padding:4px 0;text-align:right;font-weight:700">${report.counts.payoutsScanned}</td></tr>
-          <tr><td style="padding:4px 0;color:#6b7367">Webhook records reviewed</td><td style="padding:4px 0;text-align:right;font-weight:700">${report.counts.webhooksScanned}</td></tr>
+          <tr><td style="padding:4px 0;color:#6E6680">Transactions scanned</td><td style="padding:4px 0;text-align:right;font-weight:700">${report.counts.transactionsScanned}</td></tr>
+          <tr><td style="padding:4px 0;color:#6E6680">Payouts scanned</td><td style="padding:4px 0;text-align:right;font-weight:700">${report.counts.payoutsScanned}</td></tr>
+          <tr><td style="padding:4px 0;color:#6E6680">Webhook records reviewed</td><td style="padding:4px 0;text-align:right;font-weight:700">${report.counts.webhooksScanned}</td></tr>
         </table>
 
-        <p style="color:#6b7367;font-size:12px;margin:22px 0 8px;text-transform:uppercase;letter-spacing:.14em;font-weight:600">Findings</p>
-        <table style="width:100%;border-collapse:collapse;border:1px solid #e6e2d7;border-radius:8px;overflow:hidden">
+        <p style="color:#6E6680;font-size:12px;margin:22px 0 8px;text-transform:uppercase;letter-spacing:.14em;font-weight:600">Findings</p>
+        <table style="width:100%;border-collapse:collapse;border:1px solid #DCD6E3;border-radius:8px;overflow:hidden">
           <thead>
-            <tr style="background:#f3f1ea">
-              <th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#6b7367">Severity</th>
-              <th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#6b7367">Reference</th>
-              <th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#6b7367">Detail</th>
+            <tr style="background:#EEEBF1">
+              <th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#6E6680">Severity</th>
+              <th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#6E6680">Reference</th>
+              <th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#6E6680">Detail</th>
             </tr>
           </thead>
           <tbody>
@@ -365,9 +365,9 @@ function renderReportHtml(report: ReconReport): string {
           </tbody>
         </table>
 
-        <a href="${env.NEXT_PUBLIC_APP_URL}/admin/runbook" style="display:inline-block;background:#0F5132;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:600;margin-top:24px">Open runbook</a>
+        <a href="${env.NEXT_PUBLIC_APP_URL}/admin/runbook" style="display:inline-block;background:#4F2BB8;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:600;margin-top:24px">Open runbook</a>
       </div>
-      <p style="color:#6b7367;font-size:11px;text-align:center;margin:20px 0">SBBS automated reconciliation · Do not reply.</p>
+      <p style="color:#6E6680;font-size:11px;text-align:center;margin:20px 0">SBBS automated reconciliation · Do not reply.</p>
     </div></body></html>`;
 }
 

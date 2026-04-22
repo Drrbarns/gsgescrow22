@@ -96,14 +96,14 @@ export default async function HubDashboardPage() {
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <Card>
-                <div className="p-6 flex items-center justify-between border-b border-[var(--border)]">
-                  <div>
+                <div className="p-5 sm:p-6 flex items-center justify-between gap-3 border-b border-[var(--border)]">
+                  <div className="min-w-0">
                     <h2 className="font-display text-lg font-semibold">Recent transactions</h2>
-                    <p className="text-sm text-[var(--muted)] mt-0.5">
+                    <p className="text-sm text-[var(--muted)] mt-0.5 hidden sm:block">
                       Tap a row to confirm delivery, open a dispute, or download a receipt.
                     </p>
                   </div>
-                  <Link href="/hub/transactions" className="text-sm text-[var(--primary)] font-medium inline-flex items-center gap-1">
+                  <Link href="/hub/transactions" className="shrink-0 text-sm text-[var(--primary)] font-medium inline-flex items-center gap-1">
                     See all <ArrowRight size={14} />
                   </Link>
                 </div>
@@ -115,21 +115,22 @@ export default async function HubDashboardPage() {
                       <li key={r.ref}>
                         <Link
                           href={`/hub/transactions/${r.ref}`}
-                          className="grid grid-cols-12 items-center gap-4 px-6 py-4 hover:bg-[var(--surface-muted)]/50 transition-colors"
+                          className="block sm:grid sm:grid-cols-12 sm:items-center sm:gap-4 px-5 sm:px-6 py-4 hover:bg-[var(--surface-muted)]/50 transition-colors"
                         >
-                          <div className="col-span-5">
+                          <div className="sm:col-span-5 min-w-0">
                             <p className="font-medium truncate">{r.itemDescription}</p>
-                            <p className="text-xs text-[var(--muted)] mt-0.5 font-mono">
+                            <p className="text-xs text-[var(--muted)] mt-0.5 font-mono truncate">
                               {r.ref}
                             </p>
                           </div>
-                          <div className="col-span-3 text-sm text-[var(--muted)]">
+                          <div className="mt-1 sm:mt-0 sm:col-span-3 text-sm text-[var(--muted)] truncate">
                             with {r.counterparty}
                           </div>
-                          <div className="col-span-2 text-sm font-semibold">
-                            {formatGhs(r.totalCharged)}
+                          <div className="mt-2 sm:mt-0 sm:col-span-2 text-sm font-semibold flex items-center justify-between gap-3 sm:block">
+                            <span>{formatGhs(r.totalCharged)}</span>
+                            <span className="sm:hidden"><StateBadge state={r.state} /></span>
                           </div>
-                          <div className="col-span-2 flex justify-end">
+                          <div className="hidden sm:flex sm:col-span-2 justify-end">
                             <StateBadge state={r.state} />
                           </div>
                         </Link>

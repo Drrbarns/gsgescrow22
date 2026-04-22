@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Sora, Plus_Jakarta_Sans, IBM_Plex_Mono, Fraunces } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -31,6 +31,17 @@ const fraunces = Fraunces({
   style: ["normal", "italic"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FBFAFC" },
+    { media: "(prefers-color-scheme: dark)", color: "#1A1424" },
+  ],
+};
+
 export const metadata: Metadata = {
   title: {
     default: "Sell-Safe Buy-Safe — Ghana's protected checkout",
@@ -55,7 +66,7 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${jakarta.variable} ${plexMono.variable} ${fraunces.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground overflow-x-hidden">
         {children}
         <Toaster
           position="top-center"

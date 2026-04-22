@@ -56,7 +56,7 @@ export function KycForm({
 
   if (current.kycStatus === "approved") {
     return (
-      <Card className="p-6 bg-[var(--primary-soft)] border-[#bcd9c6]">
+      <Card className="p-6 bg-[var(--primary-soft)] border-[var(--border-strong)]">
         <div className="flex items-center gap-3">
           <ShieldCheck size={20} className="text-[var(--primary)]" />
           <div>

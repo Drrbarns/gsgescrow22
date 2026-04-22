@@ -73,21 +73,22 @@ function renderBadgeSvg(stats: {
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="92" viewBox="0 0 320 92" role="img" aria-label="SBBS verified seller">
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#0F5132"/>
-      <stop offset="100%" stop-color="#0a3a23"/>
+      <stop offset="0%" stop-color="#4F2BB8"/>
+      <stop offset="50%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#4338CA"/>
     </linearGradient>
   </defs>
   <rect width="320" height="92" rx="14" fill="url(#bg)"/>
   <g transform="translate(16,16)">
-    <rect width="36" height="36" rx="8" fill="#0a3a23" stroke="#C89A3A" stroke-width="1.5"/>
+    <rect width="36" height="36" rx="8" fill="#3A1F75" stroke="#C4B5FD" stroke-width="1.5"/>
     <text x="18" y="24" fill="#fff" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="700" text-anchor="middle">SB</text>
   </g>
   <g fill="#fff" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
-    <text x="64" y="32" font-size="11" font-weight="600" letter-spacing="1.4" fill="#C89A3A">SBBS VERIFIED</text>
+    <text x="64" y="32" font-size="11" font-weight="600" letter-spacing="1.4" fill="#C4B5FD">SBBS VERIFIED</text>
     <text x="64" y="52" font-size="15" font-weight="700">${escapeXml(stats.name)}</text>
-    <text x="64" y="72" font-size="11" fill="#cfe1d4">${stats.deliveries} protected ${stats.deliveries === 1 ? "deal" : "deals"} · ${ratingStars}</text>
+    <text x="64" y="72" font-size="11" fill="#DDD6FE">${stats.deliveries} protected ${stats.deliveries === 1 ? "deal" : "deals"} · ${ratingStars}</text>
   </g>
-  <text x="304" y="84" font-family="system-ui,sans-serif" font-size="9" fill="#8eaa97" text-anchor="end">sbbs.gh</text>
+  <text x="304" y="84" font-family="system-ui,sans-serif" font-size="9" fill="#A5B4FC" text-anchor="end">sbbs.gh</text>
 </svg>`;
 }
 

@@ -56,7 +56,7 @@ export function DmTheater() {
   return (
     <div className="relative w-full max-w-[380px] mx-auto">
       <div className="absolute -top-6 -left-6 -bottom-6 -right-6 rounded-[40px] bg-gradient-to-br from-[var(--primary)]/15 via-[var(--accent)]/15 to-[var(--primary)]/5 blur-2xl" />
-      <div className="relative rounded-[36px] bg-[var(--foreground)] p-3 shadow-[0_40px_80px_-20px_#00000055,0_10px_40px_-10px_#0f513260]">
+      <div className="relative rounded-[36px] bg-[var(--foreground)] p-3 shadow-[0_40px_80px_-20px_#00000055,0_10px_40px_-10px_rgba(79,43,184,0.55)]">
         <div className="rounded-[28px] bg-[var(--background)] overflow-hidden border border-white/10">
           <InstaHeader seller="kente_couture" active={tick > 1.5 && tick < 4.5} />
           <div className="px-4 py-4 space-y-2 min-h-[460px] bg-gradient-to-b from-[var(--background)] to-[var(--surface-muted)]/60">
@@ -101,7 +101,7 @@ function Bubble({ msg }: { msg: Msg }) {
           {msg.text}
         </div>
         <div className="mt-1.5 rounded-2xl border border-[var(--border-strong)] bg-white overflow-hidden shadow-[var(--shadow-card)]">
-          <div className="h-20 bg-gradient-to-br from-[var(--primary)] via-[#137a4b] to-[#0a3a23] relative">
+          <div className="h-20 bg-gradient-to-br from-[var(--primary)] via-purple-700 to-indigo-700 relative">
             <div className="absolute inset-0 bg-grid-dots opacity-30" />
             <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur px-2 py-1 text-[10px] font-semibold tracking-[0.14em] uppercase text-white">
               <Lock size={10} /> Protected
@@ -157,7 +157,7 @@ function InstaHeader({ seller, active }: { seller: string; active: boolean }) {
         <div className="relative">
           <div className="absolute inset-[-2px] rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]" />
           <div className="relative h-8 w-8 rounded-full bg-white p-[2px]">
-            <div className="h-full w-full rounded-full bg-gradient-to-br from-[var(--primary)] to-[#0a3a23] flex items-center justify-center text-white text-[10px] font-bold">
+            <div className="h-full w-full rounded-full bg-gradient-to-br from-[var(--primary)] to-indigo-700 flex items-center justify-center text-white text-[10px] font-bold">
               KC
             </div>
           </div>

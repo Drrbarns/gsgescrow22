@@ -40,7 +40,7 @@ export function LiveCounter() {
   return (
     <div className="relative">
       <div className="absolute inset-0 -m-1 rounded-[26px] bg-gradient-to-r from-[var(--primary)]/20 via-[var(--accent)]/20 to-[var(--primary)]/20 blur-xl" />
-      <div className="relative grid sm:grid-cols-3 gap-px rounded-[var(--radius-xl)] border border-[var(--border-strong)] bg-[var(--border)] overflow-hidden shadow-[0_30px_80px_-40px_#0c141040,var(--shadow-card)]">
+      <div className="relative grid sm:grid-cols-3 gap-px rounded-[var(--radius-xl)] border border-[var(--border-strong)] bg-[var(--border)] overflow-hidden shadow-[0_30px_80px_-40px_rgba(26,20,36,0.25),var(--shadow-card)]">
         <Stat
           icon={ShieldCheck}
           label="Total protected"

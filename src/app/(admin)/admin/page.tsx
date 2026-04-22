@@ -103,32 +103,35 @@ export default async function AdminDashboardPage() {
 
           <div className="grid lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2">
-              <div className="p-6 flex items-center justify-between border-b border-[var(--border)]">
-                <div>
+              <div className="p-5 sm:p-6 flex items-center justify-between gap-3 border-b border-[var(--border)]">
+                <div className="min-w-0">
                   <h2 className="font-display text-lg font-semibold">Recent transactions</h2>
-                  <p className="text-sm text-[var(--muted)] mt-0.5">Latest 8 across the platform.</p>
+                  <p className="text-sm text-[var(--muted)] mt-0.5 hidden sm:block">Latest 8 across the platform.</p>
                 </div>
-                <Link href="/admin/transactions" className="text-sm text-[var(--primary)] font-medium inline-flex items-center gap-1">
+                <Link href="/admin/transactions" className="shrink-0 text-sm text-[var(--primary)] font-medium inline-flex items-center gap-1">
                   See all <ArrowUpRight size={14} />
                 </Link>
               </div>
               <ul className="divide-y divide-[var(--border)]">
                 {recentTxns.length === 0 && (
-                  <li className="px-6 py-8 text-center text-sm text-[var(--muted)]">No transactions yet</li>
+                  <li className="px-5 sm:px-6 py-8 text-center text-sm text-[var(--muted)]">No transactions yet</li>
                 )}
                 {recentTxns.map((t) => (
                   <li key={t.ref}>
                     <Link
                       href={`/admin/transactions/${t.ref}`}
-                      className="grid grid-cols-12 items-center gap-4 px-6 py-3.5 hover:bg-[var(--surface-muted)]/50"
+                      className="block sm:grid sm:grid-cols-12 sm:items-center sm:gap-4 px-5 sm:px-6 py-3.5 hover:bg-[var(--surface-muted)]/50"
                     >
-                      <div className="col-span-5">
+                      <div className="sm:col-span-5 min-w-0">
                         <p className="font-medium truncate">{t.itemDescription}</p>
-                        <p className="text-xs text-[var(--muted)] mt-0.5 font-mono">{t.ref}</p>
+                        <p className="text-xs text-[var(--muted)] mt-0.5 font-mono truncate">{t.ref}</p>
                       </div>
-                      <div className="col-span-3 text-sm font-semibold">{formatGhs(t.totalCharged)}</div>
-                      <div className="col-span-2"><StateBadge state={t.state} /></div>
-                      <div className="col-span-2 text-xs text-[var(--muted)] text-right">{relativeTime(t.createdAt)}</div>
+                      <div className="mt-2 sm:mt-0 sm:col-span-3 text-sm font-semibold flex items-center justify-between sm:block gap-3">
+                        <span>{formatGhs(t.totalCharged)}</span>
+                        <span className="sm:hidden text-xs font-normal text-[var(--muted)]">{relativeTime(t.createdAt)}</span>
+                      </div>
+                      <div className="mt-2 sm:mt-0 sm:col-span-2"><StateBadge state={t.state} /></div>
+                      <div className="hidden sm:block sm:col-span-2 text-xs text-[var(--muted)] text-right">{relativeTime(t.createdAt)}</div>
                     </Link>
                   </li>
                 ))}

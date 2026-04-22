@@ -48,6 +48,7 @@ export function LiveCounter() {
           format="currency-ghs"
           sub="held safely to date"
           tone="primary"
+          showLive
         />
         <Stat
           icon={TrendingUp}
@@ -75,6 +76,7 @@ function Stat({
   sub,
   format = "number",
   tone = "primary",
+  showLive = false,
 }: {
   icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
@@ -82,6 +84,7 @@ function Stat({
   sub: string;
   format?: "number" | "currency-ghs";
   tone?: "primary" | "accent" | "neutral";
+  showLive?: boolean;
 }) {
   const pill =
     tone === "primary"
@@ -107,13 +110,15 @@ function Stat({
         </p>
         <p className="text-xs text-[var(--muted)] mt-1.5">{sub}</p>
       </div>
-      <span className="absolute top-3 right-4 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--primary)] opacity-70 animate-ping" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--primary)]" />
+      {showLive ? (
+        <span className="absolute top-3 right-4 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--primary)] opacity-70 animate-ping" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--primary)]" />
+          </span>
+          Live
         </span>
-        Live
-      </span>
+      ) : null}
     </div>
   );
 }

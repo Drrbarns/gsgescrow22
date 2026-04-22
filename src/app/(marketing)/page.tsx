@@ -47,7 +47,7 @@ export default function HomePage() {
 
 function CounterStrip() {
   return (
-    <section className="relative -mt-10 sm:-mt-14 z-10">
+    <section className="relative -mt-4 sm:-mt-8 z-10">
       <Container size="wide">
         <LiveCounter />
       </Container>
@@ -166,21 +166,21 @@ function HandlesStrip() {
     "@ataa_studio",
   ];
   return (
-    <section className="border-b border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+    <section className="border-b border-[var(--border)] bg-gradient-to-b from-[var(--surface-muted)] to-[var(--background)] overflow-hidden">
       <Container size="wide" className="py-10">
         <p className="text-center text-[11px] uppercase tracking-[0.22em] text-[var(--muted)] font-semibold">
           Used by sellers across&nbsp;
           <span className="text-[var(--foreground)]">Instagram · WhatsApp · TikTok · Twitter · Facebook</span>
         </p>
-        <div className="relative mt-6 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-          <div className="flex gap-8 animate-ticker w-max">
+        <div className="relative mt-4 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+          <div className="flex gap-6 animate-ticker w-max">
             {[...handles, ...handles].map((h, i) => (
-              <div key={i} className="flex items-center gap-2.5 opacity-70 hover:opacity-100 transition-opacity">
-                <AtSign size={15} className="text-[var(--muted)]" />
-                <span className="font-display font-semibold text-[17px] text-[var(--foreground)] tracking-tight">
+              <div key={i} className="flex items-center gap-2.5 opacity-75 hover:opacity-100 transition-opacity">
+                <AtSign size={16} className="text-[var(--muted)]" />
+                <span className="font-display font-semibold text-[18px] text-[var(--foreground)] tracking-tight">
                   {h}
                 </span>
-                <BadgeCheck size={13} className="text-[var(--primary)]" />
+                <BadgeCheck size={14} className="text-[var(--primary)]" />
               </div>
             ))}
           </div>

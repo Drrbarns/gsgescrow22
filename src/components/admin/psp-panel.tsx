@@ -3,11 +3,17 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Copy, Check, ExternalLink, RefreshCw, Zap } from "lucide-react";
+import { Copy, Check, ExternalLink, RefreshCw, Zap, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { reverifyPayment, reverifyPayout, forceMarkPaid } from "@/lib/actions/admin-reverify";
+import {
+  reverifyPayment,
+  reverifyPayout,
+  forceMarkPaid,
+  adminReleaseToPayout,
+  adminDispatchQueuedPayout,
+} from "@/lib/actions/admin-reverify";
 
 interface Props {
   provider: string;
@@ -42,6 +48,14 @@ export function PspPanel({
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState<string | null>(null);
   const canForce = isSuperadmin && currentState === "awaiting_payment";
+  const canInitiatePayout =
+    isSuperadmin &&
+    !payout &&
+    ["paid", "dispatched", "delivered", "disputed"].includes(currentState);
+  const canDispatchQueued =
+    isSuperadmin &&
+    !!payout &&
+    ["pending_approval", "approved", "failed"].includes(payout.state);
 
   async function copy(value: string, key: string) {
     try {
@@ -157,35 +171,128 @@ export function PspPanel({
         </div>
       </div>
 
-      {canForce && (
-        <div className="pt-4 border-t border-[var(--border)] space-y-2">
+      {(canForce || canInitiatePayout || canDispatchQueued) && (
+        <div className="pt-4 border-t border-[var(--border)] space-y-3">
           <p className="text-xs uppercase tracking-[0.14em] font-semibold text-amber-700">
             Break-glass · superadmin only
           </p>
-          <p className="text-[11px] text-[var(--muted)]">
-            Use ONLY when you&rsquo;ve confirmed the payment landed on Moolre&rsquo;s
-            dashboard but their status API is unreachable. Audit-logged.
-          </p>
-          <Button
-            size="sm"
-            variant="secondary"
-            loading={isPending}
-            onClick={() => {
-              const reason = window.prompt(
-                "Reason for force-marking paid (min 5 chars). This is audit-logged.",
-                "Verified on Moolre dashboard — status API unreachable",
-              );
-              if (!reason || reason.trim().length < 5) return;
-              startTransition(async () => {
-                const r = await forceMarkPaid(txnRef, reason.trim());
-                if (!r.ok) toast.error(r.error ?? "Failed");
-                else toast.success(r.message ?? "Force-settled");
-                router.refresh();
-              });
-            }}
-          >
-            <Zap size={12} /> Force mark paid
-          </Button>
+
+          {canForce && (
+            <div className="space-y-2">
+              <p className="text-[11px] text-[var(--muted)]">
+                Use ONLY when you&rsquo;ve confirmed the payment landed on Moolre&rsquo;s
+                dashboard but their status API is unreachable. Audit-logged.
+              </p>
+              <Button
+                size="sm"
+                variant="secondary"
+                loading={isPending}
+                onClick={() => {
+                  const reason = window.prompt(
+                    "Reason for force-marking paid (min 5 chars). This is audit-logged.",
+                    "Verified on Moolre dashboard — status API unreachable",
+                  );
+                  if (!reason || reason.trim().length < 5) return;
+                  startTransition(async () => {
+                    const r = await forceMarkPaid(txnRef, reason.trim());
+                    if (!r.ok) toast.error(r.error ?? "Failed");
+                    else toast.success(r.message ?? "Force-settled");
+                    router.refresh();
+                  });
+                }}
+              >
+                <Zap size={12} /> Force mark paid
+              </Button>
+            </div>
+          )}
+
+          {canDispatchQueued && (
+            <div className="space-y-2">
+              <p className="text-[11px] text-[var(--muted)]">
+                {payout!.state === "failed"
+                  ? "The previous payout attempt failed at the PSP. Retry it via superadmin override — the network will be re-inferred from the payee's phone prefix."
+                  : `A payout is already queued (${payout!.state.replace(
+                      "_",
+                      " ",
+                    )}). Dispatch it to the PSP now, bypassing the two-approver queue.`}{" "}
+                Audit-logged.
+              </p>
+              <Button
+                size="sm"
+                variant="secondary"
+                loading={isPending}
+                onClick={() => {
+                  const reason = window.prompt(
+                    payout!.state === "failed"
+                      ? "Reason for retrying the failed payout (min 5 chars). Audit-logged."
+                      : "Reason for dispatching queued payout without approver sign-off (min 5 chars). Audit-logged.",
+                    payout!.state === "failed"
+                      ? "Retry after PSP-side fix"
+                      : "Approver queue unavailable — superadmin override",
+                  );
+                  if (!reason || reason.trim().length < 5) return;
+                  if (
+                    !window.confirm(
+                      payout!.state === "failed"
+                        ? "Retry the payout to PSP NOW?"
+                        : "Dispatch payout to PSP NOW? This bypasses the two-approver rule.",
+                    )
+                  )
+                    return;
+                  startTransition(async () => {
+                    const r = await adminDispatchQueuedPayout(
+                      payout!.id,
+                      reason.trim(),
+                    );
+                    if (!r.ok) toast.error(r.error ?? "Failed");
+                    else toast.success(r.message ?? "Payout dispatched");
+                    router.refresh();
+                  });
+                }}
+              >
+                <Send size={12} />{" "}
+                {payout!.state === "failed"
+                  ? "Retry payout"
+                  : "Send queued payout now"}
+              </Button>
+            </div>
+          )}
+
+          {canInitiatePayout && (
+            <div className="space-y-2">
+              <p className="text-[11px] text-[var(--muted)]">
+                Skip the buyer-confirm + approver queue and dispatch the payout
+                to the seller immediately via the PSP. The superadmin is the
+                sole approver of record. Fully audit-logged.
+              </p>
+              <Button
+                size="sm"
+                variant="secondary"
+                loading={isPending}
+                onClick={() => {
+                  const reason = window.prompt(
+                    "Reason for initiating payout without buyer confirmation or approver sign-off (min 5 chars). Audit-logged.",
+                    "Buyer confirmed delivery out-of-band",
+                  );
+                  if (!reason || reason.trim().length < 5) return;
+                  if (
+                    !window.confirm(
+                      "Release funds to the seller NOW? This bypasses buyer confirmation AND the two-approver rule.",
+                    )
+                  )
+                    return;
+                  startTransition(async () => {
+                    const r = await adminReleaseToPayout(txnRef, reason.trim());
+                    if (!r.ok) toast.error(r.error ?? "Failed");
+                    else toast.success(r.message ?? "Payout dispatched");
+                    router.refresh();
+                  });
+                }}
+              >
+                <Send size={12} /> Initiate & send payout
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </Card>

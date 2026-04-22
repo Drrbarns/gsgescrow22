@@ -40,6 +40,33 @@ export function normalizeGhPhone(input: string): string | null {
   return null;
 }
 
+export type MomoNetwork = "MTN" | "VOD" | "ATL";
+
+/**
+ * Infer the MoMo network from a Ghana phone number prefix. Required because
+ * Moolre's payout endpoint rejects the transfer (TR07) when the network
+ * doesn't match the subscriber's actual telco. Returns `null` when the prefix
+ * isn't recognised so the caller can ask the user explicitly.
+ *
+ *   MTN         024, 054, 055, 059
+ *   Telecel/VOD 020, 050
+ *   AirtelTigo  026, 027, 056, 057
+ */
+export function inferMomoNetwork(phone: string): MomoNetwork | null {
+  const digits = phone.replace(/\D/g, "");
+  let local: string;
+  if (digits.startsWith("233") && digits.length === 12) local = "0" + digits.slice(3);
+  else if (digits.startsWith("0") && digits.length === 10) local = digits;
+  else if (digits.length === 9) local = "0" + digits;
+  else return null;
+
+  const prefix = local.slice(0, 3);
+  if (["024", "054", "055", "059"].includes(prefix)) return "MTN";
+  if (["020", "050"].includes(prefix)) return "VOD";
+  if (["026", "027", "056", "057"].includes(prefix)) return "ATL";
+  return null;
+}
+
 export function generateRef(prefix = "SB"): string {
   const ts = Date.now().toString(36).toUpperCase();
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();

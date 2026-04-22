@@ -20,6 +20,7 @@ import {
   formatGhs,
   generateDeliveryCode,
   generateRef,
+  inferMomoNetwork,
   normalizeGhPhone,
 } from "@/lib/utils";
 import { assertTransition, type TxnState } from "@/lib/state/transaction";
@@ -439,7 +440,7 @@ export async function markDispatched(
       payeeId: null,
       payeeName: opts.riderName ?? "Rider",
       payeePhone: opts.riderPhone,
-      payeeMomoNetwork: "MTN",
+      payeeMomoNetwork: inferMomoNetwork(opts.riderPhone) ?? "MTN",
       kind: "rider",
       amount: txn.riderPayoutAmount,
       state: "pending_approval",
@@ -545,7 +546,7 @@ export async function confirmDelivery(
   return { ok: true };
 }
 
-async function queueSellerPayout(transactionId: string) {
+export async function queueSellerPayout(transactionId: string) {
   const db = getDb();
   const [txn] = await db
     .select()
@@ -568,7 +569,7 @@ async function queueSellerPayout(transactionId: string) {
       payeeId: txn.sellerId,
       payeeName: txn.sellerName,
       payeePhone: txn.sellerPhone,
-      payeeMomoNetwork: "MTN",
+      payeeMomoNetwork: inferMomoNetwork(txn.sellerPhone) ?? "MTN",
       kind: "seller",
       amount: txn.sellerPayoutAmount,
       state: "pending_approval",
@@ -803,6 +804,13 @@ export async function overridePayoutNameMismatch(
   return { ok: true };
 }
 
+export async function executePayoutTransfer(
+  payoutId: string,
+  approverId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  return executeTransfer(payoutId, approverId);
+}
+
 async function executeTransfer(payoutId: string, approverId: string): Promise<{ ok: boolean; error?: string }> {
   const db = getDb();
   const [payout] = await db.select().from(payouts).where(eq(payouts.id, payoutId)).limit(1);
@@ -810,7 +818,17 @@ async function executeTransfer(payoutId: string, approverId: string): Promise<{ 
 
   const psp = getPsp();
   const localPhone = payout.payeePhone.replace(/^\+233/, "0");
-  const network = (payout.payeeMomoNetwork ?? "MTN") as "MTN" | "VOD" | "ATL";
+  // Prefer a phone-prefix inference over the stored value — older rows may
+  // have been persisted as "MTN" before the prefix-aware helper existed, and
+  // Moolre rejects transfers (TR07) when the network doesn't match the telco.
+  const inferred = inferMomoNetwork(payout.payeePhone);
+  const network = (inferred ?? payout.payeeMomoNetwork ?? "MTN") as "MTN" | "VOD" | "ATL";
+  if (inferred && payout.payeeMomoNetwork !== inferred) {
+    await db
+      .update(payouts)
+      .set({ payeeMomoNetwork: inferred, updatedAt: new Date() })
+      .where(eq(payouts.id, payoutId));
+  }
 
   let recipientCode: string;
   try {

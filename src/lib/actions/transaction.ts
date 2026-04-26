@@ -238,6 +238,23 @@ export async function createTransaction(
     // protected order was opened in their name, the buyer with the pay-now
     // link in case they lose the browser tab.
     if (data.initiatedBy === "buyer") {
+      // Always SMS the buyer too — earlier builds only messaged the seller
+      // at creation, which left buyers without the pay link in their SMS
+      // history when they closed the checkout tab before paying.
+      await sendSms({
+        to: buyerPhone,
+        body: SmsTemplates.orderCreatedBuyer(
+          data.buyerName.split(" ")[0],
+          ref,
+          formatGhs(fees.totalCharged),
+          init.authorizationUrl,
+        ),
+        ref,
+        kind: "txn.created",
+        targetType: "transaction",
+        targetId: txn.id,
+      });
+
       const sellerIsRegistered = Boolean(resolvedSellerId);
       const hubLink = `${env.NEXT_PUBLIC_APP_URL}/hub/transactions/${ref}`;
 
@@ -320,6 +337,23 @@ export async function createTransaction(
           ref,
           formatGhs(fees.totalCharged),
           init.authorizationUrl,
+        ),
+        ref,
+        kind: "txn.created",
+        targetType: "transaction",
+        targetId: txn.id,
+      });
+
+      // Seller-initiated flow: confirm the link creation to the signed-in
+      // seller too, so they have the ref in their SMS history without
+      // having to rely on the browser toast.
+      await sendSms({
+        to: sellerPhone,
+        body: SmsTemplates.orderCreatedSeller(
+          data.sellerName.split(" ")[0],
+          ref,
+          formatGhs(fees.totalCharged),
+          `${env.NEXT_PUBLIC_APP_URL}/hub/transactions/${ref}`,
         ),
         ref,
         kind: "txn.created",

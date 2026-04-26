@@ -11,6 +11,7 @@ export default async function BuyPage({
     seller?: string;
     sellerName?: string;
     sellerPhone?: string;
+    sellerEmail?: string;
     item?: string;
     itemLink?: string;
     price?: string;
@@ -38,6 +39,7 @@ export default async function BuyPage({
                 sellerHandle: sp.seller,
                 sellerName: sp.sellerName,
                 sellerPhone: sp.sellerPhone,
+                sellerEmail: sp.sellerEmail,
                 itemDescription: sp.item,
                 itemLink: sp.itemLink,
                 productCedis: sp.price,

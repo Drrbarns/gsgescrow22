@@ -31,8 +31,12 @@ import {
   paymentReceivedEmail,
   payoutSentEmail,
   releasedEmail,
+  sellerClaimInviteEmail,
+  sellerOrderCreatedEmail,
   sendEmail,
 } from "@/lib/email";
+import { resolveSeller } from "@/lib/auth/resolve-seller";
+import { signClaim } from "@/lib/auth/claim-tokens";
 import { getSettings } from "@/lib/settings";
 import { evaluateSellerPayoutRisk, recordFlags } from "@/lib/fraud/rules";
 import { idempotent } from "@/lib/idempotency";
@@ -45,6 +49,7 @@ const createSchema = z.object({
   buyerEmail: z.string().email().optional().or(z.literal("")),
   sellerName: z.string().min(2),
   sellerPhone: z.string().min(7),
+  sellerEmail: z.string().email().optional().or(z.literal("")),
   sellerHandle: z.string().optional(),
   itemDescription: z.string().min(2),
   itemLink: z.string().url().optional().or(z.literal("")),
@@ -112,13 +117,43 @@ export async function createTransaction(
   return idempotent(idemKey, async () => {
     const ref = generateRef();
     const db = getDb();
+
+    // Resolve the seller against existing profiles. When the buyer initiates,
+    // we attach sellerId to the matching profile if the handle/email/phone
+    // hits a row — otherwise we leave it null and SMS the seller a claim
+    // link that binds on signup. When the seller initiates the flow, they
+    // must be signed in (gated one step up), so we trust `profile.id`.
+    let resolvedSellerId: string | null = null;
+    let sellerMatchedBy: "handle" | "email" | "phone" | "none" = "none";
+    let canonicalSellerEmail: string | null = (data.sellerEmail || "").toLowerCase() || null;
+    let canonicalSellerHandle: string | null = data.sellerHandle
+      ? data.sellerHandle.trim().replace(/^@/, "").toLowerCase() || null
+      : null;
+
+    if (data.initiatedBy === "seller") {
+      resolvedSellerId = profile?.id ?? null;
+      sellerMatchedBy = profile?.id ? "handle" : "none";
+      if (!canonicalSellerEmail && profile?.email) canonicalSellerEmail = profile.email.toLowerCase();
+      if (!canonicalSellerHandle && profile?.handle) canonicalSellerHandle = profile.handle.toLowerCase();
+    } else {
+      const resolved = await resolveSeller({
+        email: data.sellerEmail || null,
+        phone: sellerPhone,
+        handle: data.sellerHandle || null,
+      });
+      resolvedSellerId = resolved.profileId;
+      sellerMatchedBy = resolved.matchedBy;
+      canonicalSellerEmail = resolved.email;
+      canonicalSellerHandle = resolved.handle;
+    }
+
     const [txn] = await db
       .insert(transactions)
       .values({
         ref,
         initiatedBy: data.initiatedBy,
         buyerId: data.initiatedBy === "buyer" ? profile?.id ?? null : null,
-        sellerId: data.initiatedBy === "seller" ? profile?.id ?? null : null,
+        sellerId: resolvedSellerId,
         buyerName: data.buyerName,
         buyerPhone,
         sellerName: data.sellerName,
@@ -137,8 +172,10 @@ export async function createTransaction(
         riderPayoutAmount: fees.riderPayout,
         state: "awaiting_payment",
         metadata: {
-          sellerHandle: data.sellerHandle ?? null,
+          sellerHandle: canonicalSellerHandle,
+          sellerEmail: canonicalSellerEmail,
           buyerEmail: data.buyerEmail || null,
+          sellerMatchedBy,
         },
       })
       .returning();
@@ -201,19 +238,80 @@ export async function createTransaction(
     // protected order was opened in their name, the buyer with the pay-now
     // link in case they lose the browser tab.
     if (data.initiatedBy === "buyer") {
-      await sendSms({
-        to: sellerPhone,
-        body: SmsTemplates.orderCreatedSeller(
-          data.sellerName.split(" ")[0],
+      const sellerIsRegistered = Boolean(resolvedSellerId);
+      const hubLink = `${env.NEXT_PUBLIC_APP_URL}/hub/transactions/${ref}`;
+
+      if (sellerIsRegistered) {
+        await sendSms({
+          to: sellerPhone,
+          body: SmsTemplates.orderCreatedSeller(
+            data.sellerName.split(" ")[0],
+            ref,
+            formatGhs(fees.totalCharged),
+            hubLink,
+          ),
           ref,
-          formatGhs(fees.totalCharged),
-          `${env.NEXT_PUBLIC_APP_URL}/t/${ref}`,
-        ),
-        ref,
-        kind: "txn.created",
-        targetType: "transaction",
-        targetId: txn.id,
-      });
+          kind: "txn.created",
+          targetType: "transaction",
+          targetId: txn.id,
+        });
+
+        if (canonicalSellerEmail) {
+          await sendEmail({
+            to: canonicalSellerEmail,
+            subject: `New protected order · ${ref}`,
+            html: sellerOrderCreatedEmail({
+              ref,
+              buyerName: data.buyerName,
+              itemDescription: data.itemDescription,
+              totalCharged: fees.totalCharged,
+              hubLink,
+            }),
+            tags: [{ name: "event", value: "txn.created" }, { name: "ref", value: ref }],
+          });
+        }
+      } else {
+        // Unregistered seller — issue a signed claim token so their
+        // eventual account inherits this order.
+        const token = signClaim({
+          ref,
+          role: "seller",
+          email: canonicalSellerEmail ?? undefined,
+          phone: sellerPhone,
+          handle: canonicalSellerHandle ?? undefined,
+        });
+        const signupLink = `${env.NEXT_PUBLIC_APP_URL}/signup?claim=${encodeURIComponent(token)}`;
+
+        await sendSms({
+          to: sellerPhone,
+          body: SmsTemplates.orderCreatedSellerClaim(
+            data.sellerName.split(" ")[0] || "Hi",
+            ref,
+            formatGhs(fees.totalCharged),
+            data.buyerName.split(" ")[0],
+            signupLink,
+          ),
+          ref,
+          kind: "txn.created.claim",
+          targetType: "transaction",
+          targetId: txn.id,
+        });
+
+        if (canonicalSellerEmail) {
+          await sendEmail({
+            to: canonicalSellerEmail,
+            subject: `${data.buyerName} wants to buy from you · ${ref}`,
+            html: sellerClaimInviteEmail({
+              ref,
+              buyerName: data.buyerName,
+              itemDescription: data.itemDescription,
+              totalCharged: fees.totalCharged,
+              signupLink,
+            }),
+            tags: [{ name: "event", value: "txn.created.claim" }, { name: "ref", value: ref }],
+          });
+        }
+      }
     } else {
       await sendSms({
         to: buyerPhone,

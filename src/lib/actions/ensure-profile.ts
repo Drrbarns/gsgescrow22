@@ -7,6 +7,7 @@ import { isDbLive } from "@/lib/env";
 import { getSessionUser } from "@/lib/auth/session";
 import { audit } from "@/lib/audit/log";
 import { getSettings } from "@/lib/settings";
+import { claimPendingSellerOrders, claimPendingBuyerOrders } from "@/lib/actions/claim-orders";
 
 /**
  * Called right after a successful sign-in. If the user was created via a
@@ -80,6 +81,16 @@ export async function ensureProfile(input: { displayName?: string }): Promise<
       reason: "Auto-backfill on sign-in",
       payload: patch,
     });
+  }
+
+  // Best-effort: attach any orders that were sent to this person's email
+  // or phone while they were offline. Failures are logged but never
+  // surface as a sign-in error.
+  try {
+    await claimPendingSellerOrders({});
+    await claimPendingBuyerOrders();
+  } catch (err) {
+    console.warn("[ensureProfile] claim sweep failed:", err);
   }
 
   return { ok: true };

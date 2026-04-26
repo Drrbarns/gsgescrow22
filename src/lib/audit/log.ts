@@ -29,6 +29,7 @@ export type AuditAction =
   | "user.impersonate"
   | "user.profile_update"
   | "user.name_override"
+  | "user.claim_order"
   | "settings.update"
   | "listing.upsert"
   | "listing.moderate"

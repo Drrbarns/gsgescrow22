@@ -23,6 +23,7 @@ type Form = {
   deliveryCedis: string;
   sellerName: string;
   sellerPhone: string;
+  sellerEmail: string;
   sellerHandle: string;
   buyerName: string;
   buyerPhone: string;
@@ -41,6 +42,7 @@ export interface BuyerWizardPrefill {
   sellerHandle?: string;
   sellerName?: string;
   sellerPhone?: string;
+  sellerEmail?: string;
   itemDescription?: string;
   itemLink?: string;
   productCedis?: string;
@@ -64,6 +66,7 @@ export function BuyerWizard({
     deliveryCedis: initial.deliveryCedis ?? "0",
     sellerName: initial.sellerName ?? "",
     sellerPhone: initial.sellerPhone ?? "",
+    sellerEmail: initial.sellerEmail ?? "",
     sellerHandle: initial.sellerHandle ?? "",
     buyerName: "",
     buyerPhone: "",
@@ -92,15 +95,23 @@ export function BuyerWizard({
   function canNext(): boolean {
     if (step === 1)
       return Boolean(form.itemDescription && Number(form.productCedis) > 0);
-    if (step === 2)
+    if (step === 2) {
+      // Seller identity must include a phone AND at least one of
+      // email/handle so we can (a) match them to an existing profile or
+      // (b) issue a signed claim invite if they're new to SBBS.
+      const hasSellerContact = Boolean(
+        form.sellerEmail || form.sellerHandle,
+      );
       return Boolean(
         form.sellerName &&
           form.sellerPhone &&
+          hasSellerContact &&
           form.buyerName &&
           form.buyerPhone &&
           form.deliveryAddress &&
           form.deliveryCity,
       );
+    }
     return true;
   }
 
@@ -113,6 +124,7 @@ export function BuyerWizard({
         buyerEmail: form.buyerEmail,
         sellerName: form.sellerName,
         sellerPhone: form.sellerPhone,
+        sellerEmail: form.sellerEmail || undefined,
         sellerHandle: form.sellerHandle || undefined,
         itemDescription: form.itemDescription,
         itemLink: form.itemLink,
@@ -206,14 +218,31 @@ export function BuyerWizard({
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="sh">Seller's SBBS handle (if any)</Label>
-                <Input
-                  id="sh"
-                  placeholder="@kentecouture"
-                  value={form.sellerHandle}
-                  onChange={(e) => set("sellerHandle", e.target.value.replace(/^@/, ""))}
-                />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="se" required>Seller's email</Label>
+                  <Input
+                    id="se"
+                    type="email"
+                    placeholder="seller@example.com"
+                    value={form.sellerEmail}
+                    onChange={(e) => set("sellerEmail", e.target.value)}
+                  />
+                  <FieldHint>
+                    We&rsquo;ll email the seller this order and a link to claim it &mdash; even if they
+                    haven&rsquo;t signed up yet.
+                  </FieldHint>
+                </div>
+                <div>
+                  <Label htmlFor="sh">Seller's SBBS handle (optional)</Label>
+                  <Input
+                    id="sh"
+                    placeholder="@kentecouture"
+                    value={form.sellerHandle}
+                    onChange={(e) => set("sellerHandle", e.target.value.replace(/^@/, ""))}
+                  />
+                  <FieldHint>If you know their handle, we&rsquo;ll link the order instantly.</FieldHint>
+                </div>
               </div>
               <hr className="border-[var(--border)]" />
               <div className="grid sm:grid-cols-2 gap-4">

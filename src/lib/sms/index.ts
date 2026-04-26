@@ -165,6 +165,13 @@ export const SmsTemplates = {
   // ---- Transactions ---------------------------------------------------
   orderCreatedSeller: (sellerFirst: string, ref: string, amount: string, link: string) =>
     `${sellerFirst}, a buyer on SBBS has started a protected order for ${amount}. Reference ${ref}. We'll SMS you the moment they pay. ${link}`,
+  /**
+   * Sent to a seller who does NOT yet have an SBBS account. The link goes
+   * to the signup page with a signed claim token so their new account
+   * automatically inherits this (and any other pending) order.
+   */
+  orderCreatedSellerClaim: (sellerFirst: string, ref: string, amount: string, buyerName: string, signupLink: string) =>
+    `${sellerFirst || "Hi"}, ${buyerName} wants to buy from you safely on SBBS (${amount}, ref ${ref}). Create your free account to fulfil the order and get paid: ${signupLink}`,
   orderCreatedBuyer: (buyerFirst: string, ref: string, amount: string, link: string) =>
     `${buyerFirst}, your SBBS order ${ref} is ready for payment (${amount}). Pay here to protect it: ${link}`,
   paymentReceived: (sellerFirst: string, ref: string, amount: string) =>

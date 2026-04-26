@@ -9,6 +9,7 @@ import { normalizeGhPhone } from "@/lib/utils";
 import { Mail, KeyRound, Phone, Lock, User } from "lucide-react";
 import { postLoginRedirect } from "@/lib/actions/post-login";
 import { ensureProfile } from "@/lib/actions/ensure-profile";
+import { claimPendingSellerOrders } from "@/lib/actions/claim-orders";
 
 type Mode = "phone" | "password" | "email";
 
@@ -24,10 +25,12 @@ export function LoginForm({
   next,
   authLive,
   intent = "login",
+  claimToken = null,
 }: {
   next?: string;
   authLive: boolean;
   intent?: "login" | "signup";
+  claimToken?: string | null;
 }) {
   const [tab, setTab] = useState<Mode>("phone");
   const [step, setStep] = useState<"enter" | "code">("enter");
@@ -45,6 +48,40 @@ export function LoginForm({
   function resetCode() {
     setStep("enter");
     setCode("");
+  }
+
+  async function finishAndRedirect() {
+    // If the user arrived via a claim link, attach the order(s) BEFORE
+    // redirecting so the Hub they land on already has the row.
+    if (claimToken) {
+      try {
+        const res = await claimPendingSellerOrders({ token: claimToken });
+        if (res.ok && res.claimed > 0) {
+          toast.success(
+            res.claimed === 1
+              ? "Order claimed and added to your Hub"
+              : `${res.claimed} orders added to your Hub`,
+          );
+        }
+      } catch {
+        // Best-effort. ensureProfile also runs a sweep, so nothing's lost.
+      }
+    }
+    // Prefer going straight to the claimed transaction if we have one.
+    if (claimToken) {
+      try {
+        const payload = JSON.parse(
+          atob(claimToken.split(".")[0].replace(/-/g, "+").replace(/_/g, "/") + "=="),
+        ) as { ref?: string };
+        if (payload.ref) {
+          window.location.assign(`/hub/transactions/${payload.ref}`);
+          return;
+        }
+      } catch {
+        // fall through to default redirect
+      }
+    }
+    window.location.assign(await postLoginRedirect(next));
   }
 
   function requireSb() {
@@ -112,7 +149,7 @@ export function LoginForm({
         await ensureProfile({}).catch(() => {});
       }
       toast.success(isSignup ? "Welcome to SBBS" : "Signed in");
-      window.location.assign(await postLoginRedirect(next));
+      await finishAndRedirect();
     } catch (err) {
       toast.error((err as Error).message ?? "Invalid code");
     } finally {
@@ -155,7 +192,7 @@ export function LoginForm({
       if (error) throw error;
       await ensureProfile({ displayName: displayName || undefined }).catch(() => {});
       toast.success(isSignup ? "Welcome to SBBS" : "Signed in");
-      window.location.assign(await postLoginRedirect(next));
+      await finishAndRedirect();
     } catch (err) {
       toast.error((err as Error).message ?? "Invalid code");
     } finally {
@@ -190,7 +227,7 @@ export function LoginForm({
         if (data.session) {
           await ensureProfile({ displayName: displayName || undefined }).catch(() => {});
           toast.success("Account created");
-          window.location.assign(await postLoginRedirect(next));
+          await finishAndRedirect();
         } else {
           toast.success(
             "Check your email — confirm it to finish signing up, then come back here to log in.",
@@ -201,7 +238,7 @@ export function LoginForm({
         if (error) throw error;
         await ensureProfile({}).catch(() => {});
         toast.success("Signed in");
-        window.location.assign(await postLoginRedirect(next));
+        await finishAndRedirect();
       }
     } catch (err) {
       toast.error((err as Error).message ?? "Invalid credentials");

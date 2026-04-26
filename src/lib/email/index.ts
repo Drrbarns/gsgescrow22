@@ -94,6 +94,50 @@ ${preheader ? `<div style="display:none;opacity:0;height:0;overflow:hidden">${pr
 
 // --- Templates -----------------------------------------------------------
 
+export function sellerOrderCreatedEmail(args: {
+  ref: string;
+  buyerName: string;
+  itemDescription: string;
+  totalCharged: number;
+  hubLink: string;
+}) {
+  return layout(
+    `<span class="pill">New protected order</span>
+     <h1>${escape(args.buyerName)} started a protected order.</h1>
+     <p class="muted">They've chosen SBBS so their money is held by a licensed PSP until the item is delivered and confirmed. Nothing for you to do yet — we'll ping you the moment the payment lands.</p>
+     <div class="ref">${args.ref}</div>
+     <table>
+       <tr><td class="l">Item</td><td class="r">${escape(args.itemDescription)}</td></tr>
+       <tr class="total"><td class="l">Total</td><td class="r">${formatGhs(args.totalCharged)}</td></tr>
+     </table>
+     <a class="btn" href="${args.hubLink}">Open order in Hub</a>
+     <p class="muted" style="font-size:12px;margin-top:16px">If you don't recognise this buyer, just ignore — no funds move unless they pay and you dispatch.</p>`,
+    `New protected order ${args.ref} from ${args.buyerName}`,
+  );
+}
+
+export function sellerClaimInviteEmail(args: {
+  ref: string;
+  buyerName: string;
+  itemDescription: string;
+  totalCharged: number;
+  signupLink: string;
+}) {
+  return layout(
+    `<span class="pill">You've been invited</span>
+     <h1>${escape(args.buyerName)} wants to buy from you — safely.</h1>
+     <p class="muted">Their ${formatGhs(args.totalCharged)} is about to be held by a licensed PSP via SBBS. To fulfil this order and receive your payout, create a free SBBS account. The order will be waiting for you on the other side.</p>
+     <div class="ref">${args.ref}</div>
+     <table>
+       <tr><td class="l">Item</td><td class="r">${escape(args.itemDescription)}</td></tr>
+       <tr class="total"><td class="l">You'll receive</td><td class="r">${formatGhs(args.totalCharged)}</td></tr>
+     </table>
+     <a class="btn" href="${args.signupLink}">Create your account &amp; claim the order</a>
+     <p class="muted" style="font-size:12px;margin-top:16px">Takes less than a minute. After sign-up, the order appears in your Hub automatically. If this wasn't expected, ignore this email — nothing will happen.</p>`,
+    `${args.buyerName} invited you to fulfil an SBBS order`,
+  );
+}
+
 export function paymentReceivedEmail(args: { ref: string; sellerName: string; itemDescription: string; totalCharged: number }) {
   return layout(
     `<span class="pill">Held safely</span>

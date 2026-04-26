@@ -27,12 +27,17 @@ type Form = {
   deliveryCity: string;
 };
 
-export function SellerWizard() {
+export interface SellerWizardPrefill {
+  sellerName?: string;
+  sellerPhone?: string;
+}
+
+export function SellerWizard({ prefill }: { prefill?: SellerWizardPrefill } = {}) {
   const [form, setForm] = useState<Form>({
     buyerName: "",
     buyerPhone: "",
-    sellerName: "",
-    sellerPhone: "",
+    sellerName: prefill?.sellerName ?? "",
+    sellerPhone: prefill?.sellerPhone ?? "",
     itemDescription: "",
     productCedis: "",
     deliveryCedis: "0",

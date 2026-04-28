@@ -79,9 +79,9 @@ function renderBadgeSvg(stats: {
     </linearGradient>
   </defs>
   <rect width="320" height="92" rx="14" fill="url(#bg)"/>
-  <g transform="translate(16,16)">
-    <rect width="36" height="36" rx="8" fill="#3A1F75" stroke="#C4B5FD" stroke-width="1.5"/>
-    <text x="18" y="24" fill="#fff" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="700" text-anchor="middle">SB</text>
+  <g transform="translate(12,18)">
+    <rect width="44" height="32" rx="16" fill="#3A1F75" stroke="#C4B5FD" stroke-width="1.5"/>
+    <text x="22" y="22" fill="#fff" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="800" text-anchor="middle" letter-spacing="-0.5">GSG</text>
   </g>
   <g fill="#fff" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
     <text x="64" y="32" font-size="11" font-weight="600" letter-spacing="1.4" fill="#C4B5FD">SBBS VERIFIED</text>

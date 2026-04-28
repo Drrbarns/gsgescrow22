@@ -331,8 +331,8 @@ function renderReportHtml(report: ReconReport): string {
   <body style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;margin:0;padding:0;background:#FBFAFC;color:#1A1424">
     <div style="max-width:640px;margin:0 auto;padding:32px 20px">
       <div style="display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:14px;color:#4F2BB8;letter-spacing:.04em">
-        <span style="width:28px;height:28px;border-radius:8px;background:#4F2BB8;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;position:relative">SB</span>
-        SELL-SAFE BUY-SAFE · DAILY RECON
+        <img src="${env.NEXT_PUBLIC_APP_URL}/brand/gsg-logo.png" alt="GSG" width="63" height="32" style="display:block;height:32px;width:auto">
+        SELL-SAFE BUY-SAFE &middot; DAILY RECON
       </div>
       <div style="background:#fff;border:1px solid #DCD6E3;border-radius:16px;padding:28px;margin-top:20px;box-shadow:0 1px 0 #00000008,0 12px 40px -24px rgba(79,43,184,0.25)">
         <h1 style="font-size:24px;line-height:1.15;margin:0 0 8px;font-weight:800;letter-spacing:-.01em">Daily reconciliation</h1>

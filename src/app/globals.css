@@ -164,12 +164,16 @@ body {
   overflow-x: hidden;
 }
 
-/* Any image that lacks explicit width/height should never burst the layout */
-img,
-video,
-svg {
-  max-width: 100%;
-  height: auto;
+/* Any image that lacks explicit width/height should never burst the layout.
+   Wrapped in @layer base so Tailwind utilities like h-7/w-auto still win;
+   without the layer, plain CSS sits above all layered styles in the cascade. */
+@layer base {
+  img,
+  video,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 /* Stop iOS Safari from auto-inflating text on landscape */

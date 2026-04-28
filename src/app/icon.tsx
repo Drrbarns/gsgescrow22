@@ -3,10 +3,10 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const runtime = "nodejs";
-export const size = { width: 180, height: 180 };
+export const size = { width: 512, height: 512 };
 export const contentType = "image/png";
 
-export default async function AppleIcon() {
+export default async function Icon() {
   const logoBuffer = await readFile(
     join(process.cwd(), "public/brand/gsg-logo.png"),
   );
@@ -21,16 +21,17 @@ export default async function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #4F2BB8 0%, #6B3DDC 100%)",
+          background: "transparent",
         }}
       >
-        {/* Pill rendered at 152x77 — preserves 2:1 aspect, leaves a tasteful
-            margin so iOS doesn't crop into the rounded corners. */}
+        {/* Wide pill is ~931x470 (≈2:1). Render it as 480x242 centered on
+            the 512x512 canvas — keeps the brand mark recognisable in tabs
+            without distortion. */}
         <img
           src={logoDataUrl}
           alt=""
-          width={152}
-          height={77}
+          width={480}
+          height={242}
           style={{ display: "block" }}
         />
       </div>

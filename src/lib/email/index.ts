@@ -60,8 +60,7 @@ const baseStyle = `
   .wrap{max-width:560px;margin:0 auto;padding:32px 20px}
   .card{background:#fff;border:1px solid #DCD6E3;border-radius:16px;padding:32px;box-shadow:0 1px 0 #00000008,0 12px 40px -24px rgba(79,43,184,0.25)}
   .brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:14px;color:#4F2BB8;letter-spacing:.04em}
-  .brand .mark{width:28px;height:28px;border-radius:8px;background:#4F2BB8;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;position:relative}
-  .brand .mark::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#8B5CF6;border:2px solid #fff}
+  .brand img{display:block;height:32px;width:auto}
   h1{font-size:26px;line-height:1.15;margin:20px 0 8px;font-weight:800;letter-spacing:-.01em}
   .muted{color:#6E6680;font-size:14px}
   .ref{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#EEEBF1;padding:4px 10px;border-radius:6px;font-size:13px;margin-top:8px}
@@ -85,7 +84,7 @@ function layout(inner: string, preheader?: string): string {
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">${baseStyle}</head><body>
 ${preheader ? `<div style="display:none;opacity:0;height:0;overflow:hidden">${preheader}</div>` : ""}
 <div class="wrap">
-  <div class="brand"><span class="mark">SB</span>SELL-SAFE BUY-SAFE</div>
+  <div class="brand"><img src="${env.NEXT_PUBLIC_APP_URL}/brand/gsg-logo.png" alt="GSG" width="63" height="32">SELL-SAFE BUY-SAFE</div>
   <div class="card">${inner}</div>
   <p class="footer">SBBS · Built in Accra · Powered by Moolre<br>
   Funds are held by a licensed PSP and released only after verification. Dispute policy at <a href="${env.NEXT_PUBLIC_APP_URL}/disputes-policy">sbbs.gh/disputes-policy</a>.</p>

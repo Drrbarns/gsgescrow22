@@ -1,11 +1,18 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "Sell-Safe Buy-Safe — Ghana's protected checkout";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const logoBuffer = await readFile(
+    join(process.cwd(), "public/brand/gsg-logo.png"),
+  );
+  const logoDataUrl = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -50,40 +57,17 @@ export default function OpengraphImage() {
           }}
         />
 
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          <div
-            style={{
-              width: 76,
-              height: 76,
-              borderRadius: 18,
-              background: "#FBFAFC",
-              color: "#4F2BB8",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 800,
-              fontSize: 36,
-              letterSpacing: -1,
-              position: "relative",
-            }}
-          >
-            SB
-            <div
-              style={{
-                position: "absolute",
-                top: -6,
-                right: -6,
-                width: 20,
-                height: 20,
-                borderRadius: 999,
-                background: "#D9CFEA",
-                border: "4px solid #2A1862",
-              }}
-            />
-          </div>
+        {/* Brand mark + wordmark */}
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          <img
+            src={logoDataUrl}
+            alt=""
+            width={180}
+            height={91}
+            style={{ display: "block" }}
+          />
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: -0.5 }}>
+            <span style={{ fontSize: 26, fontWeight: 700, letterSpacing: -0.5 }}>
               Sell-Safe Buy-Safe
             </span>
             <span

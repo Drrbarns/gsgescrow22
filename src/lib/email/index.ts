@@ -86,7 +86,7 @@ ${preheader ? `<div style="display:none;opacity:0;height:0;overflow:hidden">${pr
 <div class="wrap">
   <div class="brand"><img src="${env.NEXT_PUBLIC_APP_URL}/brand/gsg-logo.png" alt="GSG" width="63" height="32">SELL-SAFE BUY-SAFE</div>
   <div class="card">${inner}</div>
-  <p class="footer">SBBS · Built in Accra · Powered by Moolre<br>
+  <p class="footer">SBBS &middot; Built in Accra &middot; Powered by Moolre &middot; Powered By <a href="https://doctorbarns.com" target="_blank" rel="noopener noreferrer" style="color:#4F2BB8;font-weight:600;text-decoration:none">Doctor Barns Tech</a><br>
   Funds are held by a licensed PSP and released only after verification. Dispute policy at <a href="${env.NEXT_PUBLIC_APP_URL}/disputes-policy">sbbs.gh/disputes-policy</a>.</p>
 </div></body></html>`;
 }

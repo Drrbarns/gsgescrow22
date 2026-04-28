@@ -178,7 +178,17 @@ export function MarketingFooter() {
               aria-hidden
               className="h-3 w-px bg-[var(--border-strong)]"
             />
-            <span>Built in Accra · Powered by Moolre</span>
+            <span>
+              Built in Accra · Powered by Moolre · Powered By{" "}
+              <a
+                href="https://doctorbarns.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--foreground)] underline-offset-4 transition-colors hover:text-[var(--primary)] hover:underline"
+              >
+                Doctor Barns Tech
+              </a>
+            </span>
           </div>
         </div>
       </div>

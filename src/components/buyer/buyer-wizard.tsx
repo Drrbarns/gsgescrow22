@@ -203,7 +203,7 @@ export function BuyerWizard({
                   <Label htmlFor="sn" required>Seller's name</Label>
                   <Input
                     id="sn"
-                    placeholder="Ama from Kente Couture"
+                    placeholder="e.g. Ama from your favourite shop"
                     value={form.sellerName}
                     onChange={(e) => set("sellerName", e.target.value)}
                   />

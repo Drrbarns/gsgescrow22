@@ -36,9 +36,9 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-3 gap-4">
             {[
               {
-                stat: "₵384k+",
-                label: "Protected to date",
-                body: "And growing every week as more sellers add the badge.",
+                stat: "72 hrs",
+                label: "Auto-release window",
+                body: "If the buyer goes silent after delivery, the seller is paid automatically.",
               },
               {
                 stat: "5 days",

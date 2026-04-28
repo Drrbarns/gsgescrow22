@@ -241,7 +241,7 @@ export function SellerWizard({ prefill }: { prefill?: SellerWizardPrefill } = {}
           <div>
             <Label required>Your name / shop</Label>
             <Input
-              placeholder="Kente Couture"
+              placeholder="Your shop or full name"
               value={form.sellerName}
               onChange={(e) => set("sellerName", e.target.value)}
             />

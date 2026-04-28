@@ -1,7 +1,6 @@
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { getDb } from "@/lib/db/client";
 import { listings, profiles } from "@/lib/db/schema";
 import { isDbLive } from "@/lib/env";
@@ -44,6 +43,7 @@ export default async function ProductsServicesPage({
 
   const featured = items.filter((i) => i.featured).slice(0, 3);
   const regular = items.filter((i) => !featured.some((f) => f.id === i.id));
+  const dbConnected = isDbLive;
 
   return (
     <>
@@ -60,7 +60,7 @@ export default async function ProductsServicesPage({
 
       <Container size="wide" className="pt-10 pb-24">
         {items.length === 0 ? (
-          <EmptyState connected={isDbLive} q={q} />
+          <EmptyState connected={dbConnected} q={q} />
         ) : (
           <div className="space-y-12">
             {featured.length > 0 && (
@@ -120,7 +120,7 @@ async function fetchListings({
     sellerKyc: string;
   }>
 > {
-  if (!isDbLive) return SEED;
+  if (!isDbLive) return [];
   try {
     const db = getDb();
     const conditions = [eq(listings.state, "published")];
@@ -176,151 +176,24 @@ async function fetchListings({
       sellerKyc: r.sellerKyc ?? "none",
     }));
   } catch {
-    return SEED;
+    return [];
   }
 }
-
-const SEED = [
-  {
-    id: "seed-1",
-    slug: "kente-a-line-dress",
-    title: "Handmade Kente A-line dress",
-    tagline: "Limited run · Sizes S, M, L",
-    price: 42000,
-    images: ["https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=900&q=70"],
-    category: "fashion",
-    kind: "product",
-    city: "Accra",
-    featured: true,
-    sellerName: "Kente Couture",
-    sellerHandle: "kente_couture",
-    sellerBadge: true,
-    sellerKyc: "approved",
-  },
-  {
-    id: "seed-2",
-    slug: "unisex-sneakers-og",
-    title: "Vintage sneakers · OG colorway",
-    tagline: "Imported UK 9 · Deadstock",
-    price: 180000,
-    images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=70"],
-    category: "sneakers",
-    kind: "product",
-    city: "Kumasi",
-    featured: true,
-    sellerName: "Snkrs GH",
-    sellerHandle: "snkrs_gh",
-    sellerBadge: true,
-    sellerKyc: "approved",
-  },
-  {
-    id: "seed-3",
-    slug: "luxury-braids-session",
-    title: "Luxury knotless braids (full session)",
-    tagline: "Home service · 3-4 hours",
-    price: 60000,
-    images: ["https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=900&q=70"],
-    category: "hair",
-    kind: "service",
-    city: "East Legon",
-    featured: true,
-    sellerName: "Luxe Braids GH",
-    sellerHandle: "luxe_braids_gh",
-    sellerBadge: true,
-    sellerKyc: "approved",
-  },
-  {
-    id: "seed-4",
-    slug: "afro-scented-candle",
-    title: "Afro-scented soy candles",
-    tagline: "200g · 3 scents available",
-    price: 12000,
-    images: ["https://images.unsplash.com/photo-1602874801007-bd36c375b0d3?auto=format&fit=crop&w=900&q=70"],
-    category: "home",
-    kind: "product",
-    city: "Spintex",
-    featured: false,
-    sellerName: "Motherland Scents",
-    sellerHandle: "motherland_scents",
-    sellerBadge: true,
-    sellerKyc: "approved",
-  },
-  {
-    id: "seed-5",
-    slug: "custom-ankara-suit",
-    title: "Custom Ankara suit (made to measure)",
-    tagline: "Choose your print · 7 day turnaround",
-    price: 95000,
-    images: ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=70"],
-    category: "fashion",
-    kind: "product",
-    city: "Madina",
-    featured: false,
-    sellerName: "Ataa Studio",
-    sellerHandle: "ataa_studio",
-    sellerBadge: false,
-    sellerKyc: "approved",
-  },
-  {
-    id: "seed-6",
-    slug: "skincare-starter-kit",
-    title: "SPF + serum starter kit",
-    tagline: "Cleanser + serum + SPF 50",
-    price: 32000,
-    images: ["https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=70"],
-    category: "beauty",
-    kind: "product",
-    city: "Osu",
-    featured: false,
-    sellerName: "Bliss Beauty GH",
-    sellerHandle: "bliss_beauty_gh",
-    sellerBadge: true,
-    sellerKyc: "approved",
-  },
-  {
-    id: "seed-7",
-    slug: "home-cooks-jollof-tray",
-    title: "Sunday jollof tray (serves 6)",
-    tagline: "Pickup or next-day delivery",
-    price: 25000,
-    images: ["https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=900&q=70"],
-    category: "food",
-    kind: "service",
-    city: "Airport Hills",
-    featured: false,
-    sellerName: "Home Cooks GH",
-    sellerHandle: "home_cooks_gh",
-    sellerBadge: false,
-    sellerKyc: "pending",
-  },
-  {
-    id: "seed-8",
-    slug: "iphone-14-pro-mint",
-    title: "iPhone 14 Pro · 256GB · Mint",
-    tagline: "Warranty + box included",
-    price: 850000,
-    images: ["https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=900&q=70"],
-    category: "electronics",
-    kind: "product",
-    city: "Takoradi",
-    featured: false,
-    sellerName: "Electro Flip",
-    sellerHandle: "electro_flip",
-    sellerBadge: true,
-    sellerKyc: "approved",
-  },
-];
 
 function EmptyState({ connected, q }: { connected: boolean; q: string }) {
   return (
     <Card className="p-14 text-center">
       <h3 className="font-display text-2xl font-semibold">
-        {q ? `No listings match "${q}"` : connected ? "No listings yet" : "Marketplace preview"}
+        {q
+          ? `No listings match "${q}"`
+          : connected
+            ? "No listings yet"
+            : "Marketplace coming soon"}
       </h3>
       <p className="mt-2 text-sm text-[var(--muted)] max-w-md mx-auto">
         {connected
           ? "Be the first seller to list — SBBS-protected buyers are waiting."
-          : "The marketplace will light up once the database is connected. For now, this is a preview of the layout."}
+          : "Listings will appear here once sellers start publishing."}
       </p>
       <div className="mt-6 flex items-center justify-center gap-3">
         <a href="/hub/listings/new" className="text-sm font-semibold text-[var(--primary)] underline">

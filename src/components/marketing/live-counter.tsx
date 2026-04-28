@@ -11,9 +11,9 @@ interface Stats {
 }
 
 const FALLBACK: Stats = {
-  protectedAmount: 384200,
-  protectedCount: 1247,
-  sellersOnboarded: 312,
+  protectedAmount: 0,
+  protectedCount: 0,
+  sellersOnboarded: 0,
 };
 
 export function LiveCounter() {

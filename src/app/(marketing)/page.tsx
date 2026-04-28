@@ -10,7 +10,6 @@ import {
   Sparkles,
   BadgeCheck,
   MessageCircle,
-  AtSign,
   Quote,
   UserCheck,
   Store,
@@ -22,9 +21,6 @@ import { Container, Section, Eyebrow } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LiveCounter } from "@/components/marketing/live-counter";
-import { ReviewMarquee } from "@/components/marketing/review-marquee";
-import { CaseStudy } from "@/components/marketing/case-study";
-import { TickerStrip } from "@/components/marketing/ticker-strip";
 import { Reveal, Stagger, StaggerItem } from "@/components/fx/reveal";
 import { ParallaxCtaSection } from "@/components/marketing/parallax-cta";
 
@@ -32,14 +28,10 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <TickerStrip />
       <CounterStrip />
-      <HandlesStrip />
       <HowItWorks />
       <PromiseSection />
-      <CaseStudies />
       <ForBuyersAndSellers />
-      <Reviews />
       <FinalCta />
     </>
   );
@@ -147,46 +139,6 @@ function TrustPill({
       </span>
       <span className="font-medium text-white">{label}</span>
     </span>
-  );
-}
-
-function HandlesStrip() {
-  const handles = [
-    "@kente_couture",
-    "@snkrs_gh",
-    "@bliss_beauty_gh",
-    "@electro_flip",
-    "@luxe_braids_gh",
-    "@gh_streetwear",
-    "@home_cooks_gh",
-    "@lagos_to_accra",
-    "@motherland_scents",
-    "@jollof_supply",
-    "@accra_vintage",
-    "@ataa_studio",
-  ];
-  return (
-    <section className="border-b border-[var(--border)] bg-gradient-to-b from-[var(--surface-muted)] to-[var(--background)] overflow-hidden">
-      <Container size="wide" className="py-10">
-        <p className="text-center text-[11px] uppercase tracking-[0.22em] text-[var(--muted)] font-semibold">
-          Used by sellers across&nbsp;
-          <span className="text-[var(--foreground)]">Instagram · WhatsApp · TikTok · Twitter · Facebook</span>
-        </p>
-        <div className="relative mt-4 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-          <div className="flex gap-6 animate-ticker w-max">
-            {[...handles, ...handles].map((h, i) => (
-              <div key={i} className="flex items-center gap-2.5 opacity-75 hover:opacity-100 transition-opacity">
-                <AtSign size={16} className="text-[var(--muted)]" />
-                <span className="font-display font-semibold text-[18px] text-[var(--foreground)] tracking-tight">
-                  {h}
-                </span>
-                <BadgeCheck size={14} className="text-[var(--primary)]" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </Container>
-    </section>
   );
 }
 
@@ -348,13 +300,13 @@ function PromiseSection() {
               <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-white/55">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-1 w-1 rounded-full bg-[var(--accent)]" />
-                  Median resolve time
-                  <span className="font-semibold text-white/85">2.3 days</span>
+                  Dispute SLA
+                  <span className="font-semibold text-white/85">5 business days</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-1 w-1 rounded-full bg-[var(--accent)]" />
                   Refunds to original method
-                  <span className="font-semibold text-white/85">100%</span>
+                  <span className="font-semibold text-white/85">Always</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-1 w-1 rounded-full bg-[var(--accent)]" />
@@ -380,28 +332,28 @@ function DisputeTicket() {
             <Gavel size={16} className="text-[var(--accent)]" />
           </span>
           <div className="leading-tight">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">Dispute</p>
-            <p className="font-mono text-[13px] text-white/90">#SB-23K7-Y49P</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">How a dispute resolves</p>
+            <p className="font-mono text-[13px] text-white/90">Illustrative timeline</p>
           </div>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300 ring-1 ring-emerald-400/30">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-glow" />
-          Resolved
+          Refund path
         </span>
       </div>
 
-      {/* Amount + parties */}
+      {/* What happens */}
       <div className="mt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">Order value</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">Order value (example)</p>
           <p className="mt-1 font-display text-3xl font-bold tracking-tight">
             GH₵ 180<span className="text-white/40 text-xl">.00</span>
           </p>
         </div>
         <div className="sm:text-right">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">Buyer vs. Seller</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold">When you open a dispute</p>
           <p className="mt-1 text-[13px] text-white/80">
-            Akosua&nbsp;O. <span className="text-white/40">↔</span> @perfume.gh
+            Funds freeze. A real human reviews. Refund or release.
           </p>
         </div>
       </div>
@@ -414,56 +366,50 @@ function DisputeTicket() {
         />
         <TimelineRow
           icon={<Camera size={11} strokeWidth={2.5} />}
-          time="Day 1 · 14:32"
-          title="Buyer opens dispute"
+          time="Step 1"
+          title="Buyer opens dispute from their Hub"
           body={
             <span className="text-white/70">
-              <span className="text-white/90">&ldquo;Bottle arrived half-empty.&rdquo;</span>
-              <span className="ml-2 inline-flex items-center gap-1 rounded-md bg-white/8 px-1.5 py-0.5 text-[10px] text-white/60 ring-1 ring-white/10">
-                <Camera size={10} /> 3 photos
-              </span>
+              Add a short reason and upload photos as evidence.
             </span>
           }
         />
         <TimelineRow
           icon={<Lock size={11} strokeWidth={2.5} />}
-          time="Day 1 · 14:32"
-          title="Funds auto-frozen at PSP"
+          time="Immediately"
+          title="Funds auto-frozen at the PSP"
           body={<span className="text-white/60">No SBBS staff can move this money.</span>}
           muted
         />
         <TimelineRow
           icon={<UserCheck size={11} strokeWidth={2.5} />}
-          time="Day 1 · 17:58"
+          time="Within hours"
           title="Reviewer assigned"
           body={
-            <span className="inline-flex items-center gap-2 text-white/75">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary)] to-indigo-600 text-[10px] font-bold text-white">
-                AO
-              </span>
-              Akua O. · SBBS Trust Team
+            <span className="text-white/75">
+              An SBBS Trust Team member picks up the case and contacts both sides.
             </span>
           }
         />
         <TimelineRow
           icon={<CheckCheck size={11} strokeWidth={2.5} />}
-          time="Day 3 · 11:04"
-          title="Refund issued to MoMo"
+          time="Within 5 business days"
+          title="Refund or release"
           body={
             <span className="text-white/75">
-              GH₵ 180.00 returned — same wallet used at checkout.
+              Refunds go back to the original payment method — never store credit.
             </span>
           }
           highlight
         />
       </ol>
 
-      {/* Footer — human quote, but woven into the artifact */}
+      {/* Footer — promise, not a quote */}
       <div className="mt-7 flex items-start gap-3 border-t border-white/10 pt-5">
         <Quote size={16} className="text-[var(--accent)] shrink-0 mt-1" />
         <p className="text-[13px] leading-relaxed text-white/75">
-          <span className="text-white/90">&ldquo;Three days, full refund, zero drama.&rdquo;</span>{" "}
-          <span className="text-white/50">— Akosua, 31 · Tema</span>
+          <span className="text-white/90">Every dispute is read by a human.</span>{" "}
+          <span className="text-white/50">No bots, no canned replies.</span>
         </p>
       </div>
     </div>
@@ -508,81 +454,6 @@ function TimelineRow({
       <p className="mt-0.5 text-[14px] font-semibold text-white/95">{title}</p>
       <p className="mt-1 text-[13px] leading-relaxed">{body}</p>
     </li>
-  );
-}
-
-function CaseStudies() {
-  return (
-    <Section className="bg-[var(--surface-muted)]/60 relative overflow-hidden">
-      <div
-        className="absolute top-[-10%] right-[-5%] h-[400px] w-[400px] rounded-full opacity-30 blur-3xl"
-        style={{ background: "radial-gradient(closest-side, rgba(15,81,50,0.25), transparent 70%)" }}
-      />
-      <Container size="wide" className="relative">
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-12">
-          <div className="max-w-2xl">
-            <Reveal>
-              <Eyebrow>True-to-life stories</Eyebrow>
-            </Reveal>
-            <Reveal index={1}>
-              <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold mt-4 tracking-[-0.025em]">
-                Five everyday wins.
-              </h2>
-            </Reveal>
-          </div>
-          <Reveal index={2}>
-            <Link
-              href="/reviews"
-              className="text-sm font-semibold text-[var(--primary)] inline-flex items-center gap-1.5 group"
-            >
-              See all reviews
-              <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </Reveal>
-        </div>
-
-        <Stagger className="grid md:grid-cols-2 gap-6">
-          <StaggerItem>
-            <CaseStudy
-              tag="Instagram boutique"
-              title="The dress Ama almost didn&rsquo;t buy."
-              body="A ₵420 kente dress on @kente_couture. Ama was tired of being ghosted. The seller dropped an SBBS link instead of a MoMo number. Money lands in the seller&rsquo;s MoMo within minutes of approver click."
-              persona="Ama, 28 · Accra"
-              amount="₵420"
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <CaseStudy
-              tag="TikTok resell"
-              title="₵1,800 sneakers across regions."
-              body="Kwame in Kumasi, buyer in Tamale. Pre-SBBS this sale never happened. With SBBS the buyer paid into escrow, the sneakers shipped via STC, the buyer collected and released the code."
-              persona="Kwame, 34 · Kumasi"
-              amount="₵1,800"
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <CaseStudy
-              tag="Dispute"
-              title="Half-empty bottle, full refund."
-              body="Akosua&rsquo;s hair product arrived clearly used. She opened a dispute from her Hub and uploaded a photo. SBBS reviewed within 48 hours and sided with her. Refund hit her MoMo, no fuss."
-              persona="Akosua, 31 · Tema"
-              amount="₵250"
-              tone="warning"
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <CaseStudy
-              tag="Auto-release"
-              title="The buyer who went silent."
-              body="Mansa shipped a ₵90 phone case. The buyer disappeared after delivery. 72 hours later auto-release fired and Mansa got paid. The seller is no longer at the buyer&rsquo;s mercy."
-              persona="Mansa, 26 · Cape Coast"
-              amount="₵90"
-              tone="accent"
-            />
-          </StaggerItem>
-        </Stagger>
-      </Container>
-    </Section>
   );
 }
 
@@ -666,28 +537,6 @@ function ForBuyersAndSellers() {
           </Reveal>
         </div>
       </Container>
-    </Section>
-  );
-}
-
-function Reviews() {
-  return (
-    <Section className="overflow-hidden">
-      <Container size="wide">
-        <div className="max-w-2xl">
-          <Reveal>
-            <Eyebrow>Real Ghanaians</Eyebrow>
-          </Reveal>
-          <Reveal index={1}>
-            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold mt-4 tracking-[-0.025em]">
-              What people are <span className="font-serif italic font-medium text-[var(--primary)]">saying.</span>
-            </h2>
-          </Reveal>
-        </div>
-      </Container>
-      <div className="mt-10">
-        <ReviewMarquee />
-      </div>
     </Section>
   );
 }

@@ -10,9 +10,9 @@ export const revalidate = 60;
 export async function GET() {
   if (!isDbLive) {
     return NextResponse.json({
-      protectedAmount: 384200,
-      protectedCount: 1247,
-      sellersOnboarded: 312,
+      protectedAmount: 0,
+      protectedCount: 0,
+      sellersOnboarded: 0,
       live: false,
     });
   }

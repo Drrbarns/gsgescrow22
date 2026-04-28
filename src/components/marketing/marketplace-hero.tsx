@@ -2,8 +2,7 @@ import Image from "next/image";
 import { ShieldCheck, Sparkles } from "lucide-react";
 import { Container } from "@/components/ui/container";
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=2400&q=80";
+const HERO_IMAGE = "/hero/hero-portrait.png";
 
 export function MarketplaceHero() {
   return (

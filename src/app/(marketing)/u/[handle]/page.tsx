@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Container, Section } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,66 +20,57 @@ export default async function PublicSellerProfile({
 }) {
   const { handle } = await params;
 
+  if (!isDbLive) notFound();
+
   let profile: { displayName: string | null; bio: string | null; location: string | null; badgeEnabled: boolean; trustScore: number; createdAt: Date } | null = null;
   let stats = { deliveries: 0, disputes: 0, rating: 0 };
   let recent: { id: string; stars: number; body: string | null; createdAt: Date }[] = [];
 
-  if (isDbLive) {
-    try {
-      const db = getDb();
-      const [p] = await db.select().from(profiles).where(eq(profiles.handle, handle)).limit(1);
-      if (p) {
-        profile = {
-          displayName: p.displayName,
-          bio: p.bio,
-          location: p.location,
-          badgeEnabled: p.badgeEnabled,
-          trustScore: p.trustScore,
-          createdAt: p.createdAt,
-        };
-        const [d] = await db
-          .select({ count: sql<number>`count(*)::int` })
-          .from(transactions)
-          .where(and(eq(transactions.sellerId, p.id), eq(transactions.state, "completed")));
-        const [disp] = await db
-          .select({ count: sql<number>`count(*)::int` })
-          .from(transactions)
-          .where(and(eq(transactions.sellerId, p.id), eq(transactions.state, "disputed")));
-        const [r] = await db
-          .select({ avg: sql<number>`coalesce(avg(${reviews.stars})::float, 0)` })
-          .from(reviews)
-          .where(eq(reviews.revieweeId, p.id));
-        stats = {
-          deliveries: Number(d?.count ?? 0),
-          disputes: Number(disp?.count ?? 0),
-          rating: Math.round(Number(r?.avg ?? 0) * 10) / 10,
-        };
-        const rev = await db
-          .select({
-            id: reviews.id,
-            stars: reviews.stars,
-            body: reviews.body,
-            createdAt: reviews.createdAt,
-          })
-          .from(reviews)
-          .where(and(eq(reviews.revieweeId, p.id), eq(reviews.isPublic, true)))
-          .orderBy(desc(reviews.createdAt))
-          .limit(12);
-        recent = rev;
-      }
-    } catch {}
-  }
+  try {
+    const db = getDb();
+    const [p] = await db.select().from(profiles).where(eq(profiles.handle, handle)).limit(1);
+    if (p) {
+      profile = {
+        displayName: p.displayName,
+        bio: p.bio,
+        location: p.location,
+        badgeEnabled: p.badgeEnabled,
+        trustScore: p.trustScore,
+        createdAt: p.createdAt,
+      };
+      const [d] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(transactions)
+        .where(and(eq(transactions.sellerId, p.id), eq(transactions.state, "completed")));
+      const [disp] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(transactions)
+        .where(and(eq(transactions.sellerId, p.id), eq(transactions.state, "disputed")));
+      const [r] = await db
+        .select({ avg: sql<number>`coalesce(avg(${reviews.stars})::float, 0)` })
+        .from(reviews)
+        .where(eq(reviews.revieweeId, p.id));
+      stats = {
+        deliveries: Number(d?.count ?? 0),
+        disputes: Number(disp?.count ?? 0),
+        rating: Math.round(Number(r?.avg ?? 0) * 10) / 10,
+      };
+      const rev = await db
+        .select({
+          id: reviews.id,
+          stars: reviews.stars,
+          body: reviews.body,
+          createdAt: reviews.createdAt,
+        })
+        .from(reviews)
+        .where(and(eq(reviews.revieweeId, p.id), eq(reviews.isPublic, true)))
+        .orderBy(desc(reviews.createdAt))
+        .limit(12);
+      recent = rev;
+    }
+  } catch {}
 
-  if (!profile) {
-    profile = {
-      displayName: handle,
-      bio: "This is a sample SBBS public profile. The actual seller hasn't signed up yet.",
-      location: "Accra",
-      badgeEnabled: false,
-      trustScore: 0,
-      createdAt: new Date(),
-    };
-  }
+  if (!profile) notFound();
 
   return (
     <Section className="bg-paper">

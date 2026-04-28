@@ -42,6 +42,9 @@ export const viewport: Viewport = {
   ],
 };
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://sellbuysafe.gsgbrands.com.gh";
+
 export const metadata: Metadata = {
   title: {
     default: "Sell-Safe Buy-Safe — Ghana's protected checkout",
@@ -49,12 +52,54 @@ export const metadata: Metadata = {
   },
   description:
     "SBBS holds the buyer's money safely until the goods arrive as promised. The trusted middleman for Instagram, WhatsApp, TikTok and informal commerce in Ghana.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://sbbs.gh"),
+  metadataBase: new URL(SITE_URL),
+  applicationName: "Sell-Safe Buy-Safe",
+  keywords: [
+    "escrow",
+    "Ghana",
+    "online shopping protection",
+    "trust badge",
+    "Instagram commerce",
+    "WhatsApp shop",
+    "TikTok commerce",
+    "social commerce",
+    "buyer protection",
+    "seller protection",
+    "MoMo payment",
+    "GSG Brands",
+  ],
+  authors: [{ name: "GSG Brands", url: "https://gsgbrands.com.gh" }],
+  creator: "GSG Brands",
+  publisher: "GSG Brands",
+  formatDetection: { telephone: false, email: false, address: false },
+  alternates: { canonical: SITE_URL },
   openGraph: {
-    title: "Sell-Safe Buy-Safe",
+    type: "website",
+    siteName: "Sell-Safe Buy-Safe",
+    title: "Sell-Safe Buy-Safe — Ghana's protected checkout",
     description:
       "Escrow + Trust Badge + Dispute Court for Ghanaian social commerce.",
-    type: "website",
+    url: SITE_URL,
+    locale: "en_GH",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sell-Safe Buy-Safe — Ghana's protected checkout",
+    description:
+      "Escrow + Trust Badge + Dispute Court for Ghanaian social commerce.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 

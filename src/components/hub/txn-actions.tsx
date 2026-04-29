@@ -17,12 +17,12 @@ import { openDispute } from "@/lib/actions/dispute";
 import type { TxnState } from "@/lib/state/transaction";
 
 export function TxnActions({
-  ref,
+  txnRef,
   role,
   state,
   hasOpenDispute,
 }: {
-  ref: string;
+  txnRef: string;
   role: "buyer" | "seller" | "guest";
   state: TxnState;
   hasOpenDispute: boolean;
@@ -102,7 +102,7 @@ export function TxnActions({
             loading={isPending}
             onClick={() =>
               action(
-                () => markDispatched(ref, { riderName, riderPhone }),
+                () => markDispatched(txnRef, { riderName, riderPhone }),
                 "Marked dispatched. Buyer notified.",
               )
             }
@@ -130,7 +130,7 @@ export function TxnActions({
             loading={isPending}
             onClick={() =>
               action(
-                () => confirmDelivery(ref, code || undefined),
+                () => confirmDelivery(txnRef, code || undefined),
                 "Delivery confirmed. Payout queued.",
               )
             }
@@ -171,7 +171,7 @@ export function TxnActions({
               loading={isPending}
               onClick={() =>
                 action(
-                  () => openDispute({ ref, role, reason, description }),
+                  () => openDispute({ ref: txnRef, role, reason, description }),
                   "Dispute opened. Transaction frozen.",
                 )
               }
@@ -187,7 +187,7 @@ export function TxnActions({
           variant="ghost"
           className="w-full text-[var(--danger)]"
           loading={isPending}
-          onClick={() => action(() => cancelTransaction(ref, "User cancelled"), "Cancelled")}
+          onClick={() => action(() => cancelTransaction(txnRef, "User cancelled"), "Cancelled")}
         >
           Cancel this order
         </Button>

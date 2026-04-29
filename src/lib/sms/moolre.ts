@@ -25,16 +25,19 @@ function mask(s: string | undefined): string {
 }
 
 /**
- * Moolre requires a non-empty `ref` on every message. If the caller didn't
- * supply one, mint a short unique ref so the send never fails validation.
+ * Moolre requires a non-empty `ref` on every message, and it MUST be globally unique
+ * per message (not per transaction), otherwise subsequent messages for the same
+ * order will fail with ASMS05 "ref at (0) is not unique". We append a random suffix
+ * to the transaction ref to ensure uniqueness.
  */
 function ensureRef(ref: string | undefined): string {
-  if (ref && ref.trim().length > 0) return ref.trim();
   const uuid =
     typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID().replace(/-/g, "")
       : Math.random().toString(36).slice(2) + Date.now().toString(36);
-  return `sbbs-${uuid.slice(0, 20)}`;
+  const suffix = uuid.slice(0, 10);
+  if (ref && ref.trim().length > 0) return `${ref.trim()}-${suffix}`;
+  return `sbbs-${suffix}`;
 }
 
 /**

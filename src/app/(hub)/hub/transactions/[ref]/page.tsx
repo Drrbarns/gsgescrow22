@@ -143,14 +143,14 @@ export default async function TxnDetailPage({
 
           <aside className="space-y-4">
             <TxnActions
-              ref={ref}
+              txnRef={ref}
               role={role}
               state={txn.state as TxnState}
               hasOpenDispute={Boolean(dispute && dispute.state === "open")}
             />
 
             {txn.state === "completed" && role !== "guest" && (
-              <ReviewForm ref={ref} />
+              <ReviewForm txnRef={ref} />
             )}
 
             {dispute && dispute.state === "open" && role !== "guest" && (

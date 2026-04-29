@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { submitReview } from "@/lib/actions/review";
 
-export function ReviewForm({ ref }: { ref: string }) {
+export function ReviewForm({ txnRef }: { txnRef: string }) {
   const [stars, setStars] = useState(5);
   const [body, setBody] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -59,7 +59,7 @@ export function ReviewForm({ ref }: { ref: string }) {
         loading={isPending}
         onClick={() =>
           startTransition(async () => {
-            const r = await submitReview({ ref, stars, body });
+            const r = await submitReview({ ref: txnRef, stars, body });
             if (!r.ok) toast.error(r.error ?? "Couldn't submit");
             else {
               toast.success("Review posted");

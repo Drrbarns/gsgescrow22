@@ -118,7 +118,7 @@ export default async function OpengraphImage() {
             }}
           >
             {[
-              "Escrow protection",
+              "Safe payments",
               "Trust badge",
               "Dispute court",
             ].map((label) => (

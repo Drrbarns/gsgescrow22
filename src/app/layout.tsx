@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: "Sell-Safe Buy-Safe",
   keywords: [
-    "escrow",
+    "safe payments",
     "Ghana",
     "online shopping protection",
     "trust badge",
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     siteName: "Sell-Safe Buy-Safe",
     title: "Sell-Safe Buy-Safe — Ghana's protected checkout",
     description:
-      "Escrow + Trust Badge + Dispute Court for Ghanaian social commerce.",
+      "Safe payments + Trust Badge + Dispute Court for Ghanaian social commerce.",
     url: SITE_URL,
     locale: "en_GH",
   },
@@ -86,7 +86,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Sell-Safe Buy-Safe — Ghana's protected checkout",
     description:
-      "Escrow + Trust Badge + Dispute Court for Ghanaian social commerce.",
+      "Safe payments + Trust Badge + Dispute Court for Ghanaian social commerce.",
   },
   robots: {
     index: true,

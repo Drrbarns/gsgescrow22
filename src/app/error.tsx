@@ -40,8 +40,8 @@ export default function GlobalError({
         </h1>
         <p className="mt-3 max-w-md text-[15px] leading-relaxed text-[var(--muted)]">
           We&rsquo;ve logged the issue and our team will review it. Your
-          payments and escrow balances are safe — nothing was lost. Try the
-          page again or head back home.
+          payments are still held safely — nothing was lost. Try the page
+          again or head back home.
         </p>
 
         {error?.digest ? (

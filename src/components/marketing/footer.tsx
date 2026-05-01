@@ -34,7 +34,7 @@ export function MarketingFooter() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="max-w-xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-                Escrow, without the tears
+                Safe payments, without the tears
               </p>
               <h3 className="mt-2 font-display text-[26px] sm:text-[32px] leading-[1.08] tracking-[-0.02em] text-balance">
                 Ready to send money the safe way?

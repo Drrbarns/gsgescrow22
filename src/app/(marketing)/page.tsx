@@ -90,7 +90,7 @@ function Hero() {
 
           <Reveal index={2}>
             <p className="mt-5 sm:mt-6 text-[15px] sm:text-lg text-white/80 max-w-xl leading-relaxed">
-              Buy and sell confidently across social media, websites, and
+              Buy or sell confidently across social media, websites, and
               digital channels. Funds stay protected until delivery is confirmed.
             </p>
           </Reveal>

@@ -98,6 +98,7 @@ export default async function AdminTxnDetailPage({
                 <Money label="Buyer fee" v={txn.buyerFee} />
                 <Money label="Seller fee" v={txn.sellerFee} />
                 <Money label="Rider release fee" v={txn.riderReleaseFee} />
+                <Money label="Seller release fee" v={txn.sellerReleaseFee} />
                 <Money label="PSP fee" v={txn.pspFee} />
                 <Money label="Total charged" v={txn.totalCharged} bold />
                 <Money label="Seller payout" v={txn.sellerPayoutAmount} accent />

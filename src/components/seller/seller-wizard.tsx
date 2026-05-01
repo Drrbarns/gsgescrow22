@@ -14,6 +14,7 @@ import { createTransaction } from "@/lib/actions/transaction";
 const BUYER_BPS = 150;
 const SELLER_BPS = 150;
 const RIDER_FEE = 200;
+const SELLER_RELEASE_FEE = 200;
 
 type Form = {
   buyerName: string;
@@ -60,6 +61,7 @@ export function SellerWizard({ prefill }: { prefill?: SellerWizardPrefill } = {}
         buyerFeeBps: BUYER_BPS,
         sellerFeeBps: SELLER_BPS,
         riderReleaseFee: RIDER_FEE,
+        sellerReleaseFee: SELLER_RELEASE_FEE,
       }),
     [form.productCedis, form.deliveryCedis],
   );

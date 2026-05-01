@@ -11,8 +11,13 @@ export const metadata = { title: "Admin · Platform Settings" };
 const GROUPS: Array<{ title: string; keys: (keyof PlatformConfig)[]; description: string }> = [
   {
     title: "Economics",
-    description: "Platform fees and rider release fee.",
-    keys: ["buyer_fee_bps", "seller_fee_bps", "rider_release_fee_pesewas"],
+    description: "Platform fees, rider release fee, and seller release fee.",
+    keys: [
+      "buyer_fee_bps",
+      "seller_fee_bps",
+      "rider_release_fee_pesewas",
+      "seller_release_fee_pesewas",
+    ],
   },
   {
     title: "Operations",
@@ -96,6 +101,7 @@ export default async function AdminSettingsPage() {
               <Env k="PLATFORM_BUYER_FEE_BPS" v={env.PLATFORM_BUYER_FEE_BPS} />
               <Env k="PLATFORM_SELLER_FEE_BPS" v={env.PLATFORM_SELLER_FEE_BPS} />
               <Env k="PLATFORM_RIDER_RELEASE_FEE_PESEWAS" v={env.PLATFORM_RIDER_RELEASE_FEE_PESEWAS} />
+              <Env k="PLATFORM_SELLER_RELEASE_FEE_PESEWAS" v={env.PLATFORM_SELLER_RELEASE_FEE_PESEWAS} />
               <Env k="PLATFORM_TXN_CAP_PESEWAS" v={env.PLATFORM_TXN_CAP_PESEWAS} />
               <Env k="PLATFORM_AUTO_RELEASE_HOURS" v={env.PLATFORM_AUTO_RELEASE_HOURS} />
             </dl>

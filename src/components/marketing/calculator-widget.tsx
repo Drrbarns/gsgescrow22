@@ -10,6 +10,7 @@ import { formatGhs, ghsToPesewas } from "@/lib/utils";
 const BUYER_BPS = 150;
 const SELLER_BPS = 150;
 const RIDER_FEE = 200;
+const SELLER_RELEASE_FEE = 200;
 
 export function CalculatorWidget() {
   const [productCedis, setProductCedis] = useState("420");
@@ -24,6 +25,7 @@ export function CalculatorWidget() {
       buyerFeeBps: BUYER_BPS,
       sellerFeeBps: SELLER_BPS,
       riderReleaseFee: RIDER_FEE,
+      sellerReleaseFee: SELLER_RELEASE_FEE,
     });
   }, [productCedis, deliveryCedis]);
 
@@ -71,6 +73,9 @@ export function CalculatorWidget() {
             <Row label={`Buyer fee (${BUYER_BPS / 100}%)`} value={formatGhs(fees.buyerFee)} />
             {fees.riderReleaseFee > 0 && (
               <Row label="Rider release fee" value={formatGhs(fees.riderReleaseFee)} />
+            )}
+            {fees.sellerReleaseFee > 0 && (
+              <Row label="Seller release fee" value={formatGhs(fees.sellerReleaseFee)} />
             )}
             <Row total label="Total" value={formatGhs(fees.totalCharged)} />
           </Block>

@@ -42,9 +42,9 @@ export default function DisputesPolicyPage() {
         Refunds reach the buyer&rsquo;s original payment method (MoMo wallet, card) within 3 business days of approval. Where the original method is unavailable, an alternative is arranged with the buyer.
       </p>
 
-      <h2>7. Rider fee</h2>
+      <h2>7. Release fees</h2>
       <p>
-        The rider release fee is paid out separately when the transaction is dispatched. It is generally not refunded, even if the product portion is, because the dispatch service was performed.
+        The rider release fee is collected when there&rsquo;s a delivery leg and is paid out separately when the transaction is dispatched. The seller release fee is a flat fee charged on every order to cover the cost of the seller payout transfer. Both release fees are generally not refunded, even if the product portion is, because the underlying dispatch and payout services have already been performed.
       </p>
 
       <h2>8. Repeat disputes</h2>

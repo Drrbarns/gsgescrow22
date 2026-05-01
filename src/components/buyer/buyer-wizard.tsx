@@ -15,6 +15,7 @@ import { createTransaction } from "@/lib/actions/transaction";
 const BUYER_BPS = 150;
 const SELLER_BPS = 150;
 const RIDER_FEE = 200;
+const SELLER_RELEASE_FEE = 200;
 
 type Form = {
   itemDescription: string;
@@ -84,6 +85,7 @@ export function BuyerWizard({
         buyerFeeBps: BUYER_BPS,
         sellerFeeBps: SELLER_BPS,
         riderReleaseFee: RIDER_FEE,
+        sellerReleaseFee: SELLER_RELEASE_FEE,
       }),
     [form.productCedis, form.deliveryCedis],
   );
@@ -324,6 +326,12 @@ export function BuyerWizard({
                   <div className="flex justify-between text-sm mt-2">
                     <span className="text-[var(--muted)]">Rider release fee</span>
                     <span className="font-medium">{formatGhs(fees.riderReleaseFee)}</span>
+                  </div>
+                )}
+                {fees.sellerReleaseFee > 0 && (
+                  <div className="flex justify-between text-sm mt-2">
+                    <span className="text-[var(--muted)]">Seller release fee</span>
+                    <span className="font-medium">{formatGhs(fees.sellerReleaseFee)}</span>
                   </div>
                 )}
                 <div className="border-t border-[var(--border)] mt-3 pt-3 flex justify-between items-baseline">

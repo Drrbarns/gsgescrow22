@@ -38,18 +38,29 @@ export function calculateFees(args: {
   buyerFeeBps: number;
   sellerFeeBps: number;
   riderReleaseFee: number;
+  sellerReleaseFee?: number;
 }) {
   const buyerFee = Math.round((args.productAmount * args.buyerFeeBps) / 10000);
   const sellerFee = Math.round((args.productAmount * args.sellerFeeBps) / 10000);
+  // Rider release fee only applies if there's an actual delivery leg.
   const riderReleaseFee = args.deliveryAmount > 0 ? args.riderReleaseFee : 0;
+  // Seller release fee is unconditional — every order ultimately releases
+  // funds to a seller, so we collect it on every transaction. Falls back to
+  // 0 when callers (e.g. older clients) haven't been updated to pass it.
+  const sellerReleaseFee = args.sellerReleaseFee ?? 0;
   const totalCharged =
-    args.productAmount + args.deliveryAmount + buyerFee + riderReleaseFee;
+    args.productAmount +
+    args.deliveryAmount +
+    buyerFee +
+    riderReleaseFee +
+    sellerReleaseFee;
   const sellerPayout = args.productAmount - sellerFee;
   const riderPayout = args.deliveryAmount;
   return {
     buyerFee,
     sellerFee,
     riderReleaseFee,
+    sellerReleaseFee,
     totalCharged,
     sellerPayout,
     riderPayout,

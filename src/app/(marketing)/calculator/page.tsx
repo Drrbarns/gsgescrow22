@@ -13,8 +13,8 @@ export default function CalculatorPage() {
         </h1>
         <p className="mt-4 text-lg text-[var(--muted)] max-w-2xl">
           No hidden fees, no markup on Moolre rates. Two transparent
-          platform fees, plus a flat rider release fee when there&rsquo;s a
-          delivery component.
+          platform fees, a flat seller release fee, and a rider release fee
+          when there&rsquo;s a delivery component.
         </p>
         <div className="mt-10">
           <CalculatorWidget />

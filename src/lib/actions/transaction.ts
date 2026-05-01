@@ -107,6 +107,7 @@ export async function createTransaction(
     buyerFeeBps: settings.buyer_fee_bps,
     sellerFeeBps: settings.seller_fee_bps,
     riderReleaseFee: settings.rider_release_fee_pesewas,
+    sellerReleaseFee: settings.seller_release_fee_pesewas,
   });
 
   const profile = await getCurrentProfile().catch(() => null);
@@ -167,6 +168,7 @@ export async function createTransaction(
         buyerFee: fees.buyerFee,
         sellerFee: fees.sellerFee,
         riderReleaseFee: fees.riderReleaseFee,
+        sellerReleaseFee: fees.sellerReleaseFee,
         totalCharged: fees.totalCharged,
         sellerPayoutAmount: fees.sellerPayout,
         riderPayoutAmount: fees.riderPayout,

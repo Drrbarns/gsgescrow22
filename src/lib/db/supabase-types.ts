@@ -871,6 +871,7 @@ export type Database = {
           seller_name: string
           seller_payout_amount: number
           seller_phone: string
+          seller_release_fee: number
           state: Database["public"]["Enums"]["txn_state"]
           total_charged: number
           updated_at: string
@@ -909,6 +910,7 @@ export type Database = {
           seller_name: string
           seller_payout_amount: number
           seller_phone: string
+          seller_release_fee?: number
           state?: Database["public"]["Enums"]["txn_state"]
           total_charged: number
           updated_at?: string
@@ -947,6 +949,7 @@ export type Database = {
           seller_name?: string
           seller_payout_amount?: number
           seller_phone?: string
+          seller_release_fee?: number
           state?: Database["public"]["Enums"]["txn_state"]
           total_charged?: number
           updated_at?: string

@@ -6,6 +6,7 @@ const DEFAULTS = [
   { key: "buyer_fee_bps", value: 150, description: "Buyer platform fee in basis points (100 = 1%)" },
   { key: "seller_fee_bps", value: 150, description: "Seller platform fee in basis points" },
   { key: "rider_release_fee_pesewas", value: 200, description: "Flat rider release fee" },
+  { key: "seller_release_fee_pesewas", value: 200, description: "Flat seller release fee" },
   { key: "txn_cap_pesewas", value: 200000, description: "Per-transaction cap; ₵2,000 in soft launch" },
   { key: "auto_release_hours", value: 72, description: "Hours before auto-release fires" },
   { key: "two_approver_threshold_pesewas", value: 500000, description: "Above this, payouts need two approvers" },

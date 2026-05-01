@@ -141,6 +141,7 @@ export default async function RunbookPage() {
               <ConfigRow label="Buyer fee" value={`${(settings.buyer_fee_bps / 100).toFixed(2)}%`} />
               <ConfigRow label="Seller fee" value={`${(settings.seller_fee_bps / 100).toFixed(2)}%`} />
               <ConfigRow label="Rider release fee" value={formatGhs(settings.rider_release_fee_pesewas)} />
+              <ConfigRow label="Seller release fee" value={formatGhs(settings.seller_release_fee_pesewas)} />
               <ConfigRow label="Transaction cap" value={formatGhs(settings.txn_cap_pesewas)} />
               <ConfigRow label="Auto-release window" value={`${settings.auto_release_hours}h`} />
               <ConfigRow label="Two-approver threshold" value={formatGhs(settings.two_approver_threshold_pesewas)} />

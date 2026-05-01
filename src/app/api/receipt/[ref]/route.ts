@@ -61,6 +61,7 @@ export async function GET(
           React.createElement(Row, { label: "Delivery", value: formatGhs(txn.deliveryAmount) }),
           React.createElement(Row, { label: "Buyer fee", value: formatGhs(txn.buyerFee) }),
           React.createElement(Row, { label: "Rider release fee", value: formatGhs(txn.riderReleaseFee) }),
+          React.createElement(Row, { label: "Seller release fee", value: formatGhs(txn.sellerReleaseFee) }),
           React.createElement(View, { style: styles.hr }),
           React.createElement(View, { style: styles.row },
             React.createElement(Text, { style: styles.total }, "Total charged"),

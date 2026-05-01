@@ -164,6 +164,7 @@ export const transactions = pgTable(
     buyerFee: bigint("buyer_fee", { mode: "number" }).notNull().default(0),
     sellerFee: bigint("seller_fee", { mode: "number" }).notNull().default(0),
     riderReleaseFee: bigint("rider_release_fee", { mode: "number" }).notNull().default(0),
+    sellerReleaseFee: bigint("seller_release_fee", { mode: "number" }).notNull().default(0),
     pspFee: bigint("psp_fee", { mode: "number" }).notNull().default(0),
     totalCharged: bigint("total_charged", { mode: "number" }).notNull(),
     sellerPayoutAmount: bigint("seller_payout_amount", { mode: "number" }).notNull(),

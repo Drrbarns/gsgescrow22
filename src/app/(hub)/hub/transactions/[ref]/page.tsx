@@ -103,6 +103,7 @@ export default async function TxnDetailPage({
                 <Money label="Delivery" value={txn.deliveryAmount} />
                 <Money label="Buyer fee" value={txn.buyerFee} />
                 <Money label="Rider release fee" value={txn.riderReleaseFee} />
+                <Money label="Seller release fee" value={txn.sellerReleaseFee} />
                 <Money label="Seller payout" value={txn.sellerPayoutAmount} accent />
                 <Money label="Total charged" value={txn.totalCharged} bold />
               </div>

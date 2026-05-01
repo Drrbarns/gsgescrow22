@@ -8,6 +8,7 @@ export interface PlatformConfig {
   buyer_fee_bps: number;
   seller_fee_bps: number;
   rider_release_fee_pesewas: number;
+  seller_release_fee_pesewas: number;
   txn_cap_pesewas: number;
   auto_release_hours: number;
   two_approver_threshold_pesewas: number;
@@ -50,6 +51,7 @@ function defaults(): PlatformConfig {
     buyer_fee_bps: env.PLATFORM_BUYER_FEE_BPS,
     seller_fee_bps: env.PLATFORM_SELLER_FEE_BPS,
     rider_release_fee_pesewas: env.PLATFORM_RIDER_RELEASE_FEE_PESEWAS,
+    seller_release_fee_pesewas: env.PLATFORM_SELLER_RELEASE_FEE_PESEWAS,
     txn_cap_pesewas: env.PLATFORM_TXN_CAP_PESEWAS,
     auto_release_hours: env.PLATFORM_AUTO_RELEASE_HOURS,
     two_approver_threshold_pesewas: 500_000,
@@ -135,6 +137,7 @@ export function describeSetting(key: keyof PlatformConfig): {
     buyer_fee_bps: { label: "Buyer fee", hint: "Basis points, 100 = 1%", kind: "bps", group: "economics" },
     seller_fee_bps: { label: "Seller fee", hint: "Basis points, 100 = 1%", kind: "bps", group: "economics" },
     rider_release_fee_pesewas: { label: "Rider release fee", hint: "Flat fee added when there's a delivery", kind: "pesewas", group: "economics" },
+    seller_release_fee_pesewas: { label: "Seller release fee", hint: "Flat fee charged on every order to cover the seller payout transfer", kind: "pesewas", group: "economics" },
     txn_cap_pesewas: { label: "Transaction cap", hint: "Max total charged per deal", kind: "pesewas", group: "operations" },
     auto_release_hours: { label: "Auto-release window", hint: "Hours before payout auto-queues", kind: "number", group: "operations" },
     two_approver_threshold_pesewas: { label: "Two-approver threshold", hint: "Above this amount, payouts need two approvers", kind: "pesewas", group: "risk" },

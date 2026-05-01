@@ -8,7 +8,7 @@ export const contentType = "image/png";
 
 export default async function Icon() {
   const logoBuffer = await readFile(
-    join(process.cwd(), "public/brand/gsg-logo.png"),
+    join(process.cwd(), "public/brand/fgfg.png"),
   );
   const logoDataUrl = `data:image/png;base64,${logoBuffer.toString("base64")}`;
 

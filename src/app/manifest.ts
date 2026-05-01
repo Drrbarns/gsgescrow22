@@ -28,7 +28,7 @@ export default function manifest(): MetadataRoute.Manifest {
       },
       {
         // Raw wide pill — useful for "maskable" / wider tiles.
-        src: "/brand/gsg-logo.png",
+        src: "/brand/fgfg.png",
         sizes: "931x470",
         type: "image/png",
         purpose: "any",

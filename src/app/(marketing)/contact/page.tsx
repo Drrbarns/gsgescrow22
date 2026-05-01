@@ -1,6 +1,6 @@
 import { Container, Section, Eyebrow } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
-import { Mail, Phone, MessageCircle, MapPin } from "lucide-react";
+import { Mail, Phone, MessageCircle } from "lucide-react";
 
 export const metadata = { title: "Contact" };
 
@@ -27,19 +27,14 @@ export default function ContactPage() {
           <ContactCard
             icon={MessageCircle}
             label="WhatsApp"
-            value="+233 24 000 0000"
-            href="https://wa.me/233240000000"
+            value="+233 (0) 246 033 792"
+            href="https://wa.me/233246033792"
           />
           <ContactCard
             icon={Phone}
             label="Phone (office hours)"
-            value="+233 30 000 0000"
-            href="tel:+233300000000"
-          />
-          <ContactCard
-            icon={MapPin}
-            label="Office"
-            value="GSG Brands · Osu, Accra"
+            value="+233 (0) 579 033 792"
+            href="tel:+233579033792"
           />
         </div>
 

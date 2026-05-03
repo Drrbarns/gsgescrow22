@@ -9,7 +9,7 @@ import { getDb } from "@/lib/db/client";
 import { transactions } from "@/lib/db/schema";
 import { isDbLive, isPaymentsLive } from "@/lib/env";
 import { markPaid } from "@/lib/actions/transaction";
-import { getPsp } from "@/lib/payments";
+import { getChargeAdapterForTxn } from "@/lib/payments/charge-adapter";
 import { stateLabel, type TxnState } from "@/lib/state/transaction";
 import { StateBadge } from "@/components/ui/badge";
 
@@ -50,21 +50,28 @@ export default async function ReturnPage({
   let verified = false;
 
   if (ref && isDbLive) {
+    const [t] = await getDb()
+      .select()
+      .from(transactions)
+      .where(eq(transactions.ref, ref))
+      .limit(1);
+
     if (sp.stub === "1" || !isPaymentsLive) {
       console.log(`[buy/return] ref=${ref} stub path → markPaid`);
       await markPaid(ref);
-    } else {
-      // Try to verify with a short deadline. If Moolre's status endpoint is
-      // slow/unreachable, fall through — the webhook will settle it.
+    } else if (t) {
+      const chargePsp = await getChargeAdapterForTxn(t.id);
       const v = await withDeadline(
-        getPsp().verifyCharge(ref).catch((err: Error) => {
+        chargePsp.verifyCharge(ref).catch((err: Error) => {
           console.error(`[buy/return] ref=${ref} verifyCharge threw:`, err.message);
           return null;
         }),
         6000,
         `verifyCharge(${ref})`,
       );
-      console.log(`[buy/return] ref=${ref} verifyCharge=${v?.status ?? "timeout"}`);
+      console.log(
+        `[buy/return] ref=${ref} via=${chargePsp.provider} verifyCharge=${v?.status ?? "timeout"}`,
+      );
       if (v?.status === "succeeded") {
         const r = await markPaid(ref);
         console.log(
@@ -72,13 +79,14 @@ export default async function ReturnPage({
         );
       }
     }
-    const [t] = await getDb()
+
+    const [t2] = await getDb()
       .select()
       .from(transactions)
       .where(eq(transactions.ref, ref))
       .limit(1);
-    if (t) {
-      state = t.state as TxnState;
+    if (t2) {
+      state = t2.state as TxnState;
       verified =
         state === "paid" ||
         state === "dispatched" ||
@@ -107,8 +115,8 @@ export default async function ReturnPage({
                   Payment held safely.
                 </h1>
                 <p className="mt-3 text-[var(--muted)]">
-                  Your money is with Moolre. The seller has been notified by SMS.
-                  We&rsquo;ll text you the moment it&rsquo;s dispatched.
+                  Your payment is with our licensed partner (Moolre or Paystack). The seller has been
+                  notified by SMS. We&rsquo;ll text you the moment it&rsquo;s dispatched.
                 </p>
                 <div className="mt-6 flex items-center justify-center gap-3">
                   {state && <StateBadge state={state} />}
@@ -133,8 +141,8 @@ export default async function ReturnPage({
                 </h1>
                 <p className="mt-3 text-[var(--muted)]">
                   {sp.status === "success"
-                    ? "Moolre has confirmed your payment on their side. We're finalising it on ours — this usually takes under a minute. Refresh this page in a moment, or jump to your Hub."
-                    : "Your payment is being verified with Moolre. This usually takes a few seconds. You can refresh, or check your Hub."}
+                    ? "Your bank or wallet provider has confirmed the payment. We're finalising it on ours — this usually takes under a minute. Refresh this page in a moment, or jump to your Hub."
+                    : "Your payment is being verified with your provider. This usually takes a few seconds. You can refresh, or check your Hub."}
                 </p>
                 <div className="mt-6 font-mono text-sm text-[var(--muted)]">{ref}</div>
                 <div className="mt-8">

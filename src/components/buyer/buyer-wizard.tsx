@@ -140,7 +140,7 @@ export function BuyerWizard({
         return;
       }
       toast.success("Order created — opening secure checkout");
-      router.push(r.authorizationUrl);
+      router.push(r.checkoutUrl);
     });
   }
 

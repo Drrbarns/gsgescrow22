@@ -30,6 +30,7 @@ export function getPsp(provider?: PspProvider): PspAdapter {
 }
 
 export { moolrePsp, paystack, hubtelPsp };
+/** Charge PSP helpers live in `./charge-adapter` — do not barrel-export here (client components import `calculateFees` from this file). */
 export type * from "./types";
 
 export function calculateFees(args: {

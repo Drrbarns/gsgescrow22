@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { getPsp } from "@/lib/payments";
+import { paystack } from "@/lib/payments/paystack";
 import { markPaid } from "@/lib/actions/transaction";
 import { getDb } from "@/lib/db/client";
 import { webhooksLog } from "@/lib/db/schema";
-import { isDbLive, isPaymentsLive } from "@/lib/env";
+import { isDbLive, isPaystackLive } from "@/lib/env";
 import { audit } from "@/lib/audit/log";
 
 export const runtime = "nodejs";
@@ -13,12 +13,17 @@ export async function POST(req: Request) {
   const raw = await req.text();
   const sig = (await headers()).get("x-paystack-signature") ?? "";
 
-  const psp = getPsp();
-  const sigOk = isPaymentsLive ? psp.verifyWebhookSignature(raw, sig) : true;
+  // Card checkout is disabled unless Paystack keys exist — never process (or
+  // ack unsigned) Paystack events in that mode, even if Moolre is primary.
+  if (!isPaystackLive) {
+    return NextResponse.json({ ok: true, ignored: true });
+  }
+
+  const sigOk = paystack.verifyWebhookSignature(raw, sig);
   let event = "unknown";
   let data: Record<string, unknown> = {};
   try {
-    const parsed = psp.parseWebhookEvent(raw);
+    const parsed = paystack.parseWebhookEvent(raw);
     event = parsed.event;
     data = parsed.data as Record<string, unknown>;
   } catch (err) {

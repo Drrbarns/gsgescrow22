@@ -81,7 +81,12 @@ export default async function RunbookPage() {
       ok: isPaymentsLive,
       note: !isPaymentsLive
         ? "No PSP keys — using stub adapter"
-        : `Moolre primary${isPaystackLive ? " · Paystack failover" : ""} (GHS)`,
+        : [
+            isMoolreLive ? "Moolre · Mobile Money checkout" : null,
+            isPaystackLive ? "Paystack · Card checkout" : null,
+          ]
+            .filter(Boolean)
+            .join(" · ") || "PSP",
     },
     {
       name: "SMS",

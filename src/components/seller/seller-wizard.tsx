@@ -95,7 +95,7 @@ export function SellerWizard({ prefill }: { prefill?: SellerWizardPrefill } = {}
         toast.error(r.error);
         return;
       }
-      const url = r.authorizationUrl;
+      const url = r.checkoutUrl;
       setLink({ ref: r.ref, url });
       toast.success("Payment link generated");
     });

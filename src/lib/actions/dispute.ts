@@ -2,16 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
-import { transactions, transactionEvents, disputes, evidenceFiles } from "@/lib/db/schema";
+import {
+  transactions,
+  transactionEvents,
+  disputes,
+  evidenceFiles,
+  payments,
+} from "@/lib/db/schema";
 import { isDbLive } from "@/lib/env";
 import { audit } from "@/lib/audit/log";
 import { assertTransition, type TxnState } from "@/lib/state/transaction";
 import { getCurrentProfile, isAdminRole } from "@/lib/auth/session";
 import { sendSms, SmsTemplates } from "@/lib/sms";
 import { formatGhs } from "@/lib/utils";
-import { getPsp } from "@/lib/payments";
+import { chargeAdapterForProvider } from "@/lib/payments/charge-adapter";
 
 const openSchema = z.object({
   ref: z.string(),
@@ -172,9 +178,15 @@ export async function resolveDispute(input: z.infer<typeof resolveSchema>) {
   if (parsed.data.resolution === "resolved_buyer" || parsed.data.resolution === "partial") {
     const refundAmount = parsed.data.refundAmount ?? txn.totalCharged;
     try {
-      const psp = getPsp();
+      const [paid] = await db
+        .select()
+        .from(payments)
+        .where(and(eq(payments.transactionId, txn.id), eq(payments.state, "succeeded")))
+        .orderBy(desc(payments.createdAt))
+        .limit(1);
+      const psp = chargeAdapterForProvider(paid?.psp);
       await psp.refund({
-        paymentReference: txn.ref,
+        paymentReference: paid?.pspReference ?? txn.ref,
         amount: refundAmount,
         reason: `Dispute resolution: ${d.id}`,
         buyerPhone: txn.buyerPhone,

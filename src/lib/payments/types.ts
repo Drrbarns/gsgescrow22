@@ -7,6 +7,8 @@ export interface InitChargeInput {
   phone?: string;
   callbackUrl: string;
   metadata?: Record<string, unknown>;
+  /** Paystack only: restrict checkout channels (e.g. `["card"]` for card-only). */
+  channels?: string[];
 }
 
 export interface InitChargeResult {

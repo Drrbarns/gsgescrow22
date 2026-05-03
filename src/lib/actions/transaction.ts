@@ -3,7 +3,7 @@
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import {
   transactions,
@@ -13,9 +13,12 @@ import {
   alerts,
   profiles,
 } from "@/lib/db/schema";
-import { env, isDbLive } from "@/lib/env";
+import { env, isDbLive, isMoolreLive, isPaystackLive } from "@/lib/env";
 import { audit } from "@/lib/audit/log";
 import { calculateFees, getPsp } from "@/lib/payments";
+import { moolrePsp } from "@/lib/payments/moolre";
+import { paystack as paystackForCharge } from "@/lib/payments/paystack";
+import { stubPsp } from "@/lib/payments/stub";
 import {
   formatGhs,
   generateDeliveryCode,
@@ -65,7 +68,7 @@ export type CreateTxnInput = z.infer<typeof createSchema>;
 export async function createTransaction(
   input: CreateTxnInput,
 ): Promise<
-  | { ok: true; ref: string; authorizationUrl: string; transactionId: string }
+  | { ok: true; ref: string; checkoutUrl: string; transactionId: string }
   | { ok: false; error: string }
 > {
   const parsed = createSchema.safeParse(input);
@@ -206,35 +209,7 @@ export async function createTransaction(
       },
     });
 
-    const psp = getPsp();
-    const callbackUrl = `${env.NEXT_PUBLIC_APP_URL}/buy/return?ref=${encodeURIComponent(ref)}`;
-    let init;
-    try {
-      init = await psp.initCharge({
-        reference: ref,
-        amount: fees.totalCharged,
-        email:
-          data.buyerEmail ||
-          profile?.email ||
-          `${ref.toLowerCase()}@buyers.sbbs.gh`,
-        phone: buyerPhone,
-        callbackUrl,
-        metadata: { ref, transactionId: txn.id },
-      });
-    } catch (err) {
-      return { ok: false as const, error: (err as Error).message };
-    }
-
-    await db.insert(payments).values({
-      transactionId: txn.id,
-      psp: psp.provider,
-      pspReference: init.reference,
-      pspAccessCode: init.accessCode,
-      authorizationUrl: init.authorizationUrl,
-      amount: fees.totalCharged,
-      state: "initialized",
-      raw: init.raw as Record<string, unknown>,
-    });
+    const checkoutUrl = `${env.NEXT_PUBLIC_APP_URL}/buy/checkout?ref=${encodeURIComponent(ref)}`;
 
     // Notify both parties right after creation — the seller so they know a
     // protected order was opened in their name, the buyer with the pay-now
@@ -249,7 +224,7 @@ export async function createTransaction(
           data.buyerName.split(" ")[0],
           ref,
           formatGhs(fees.totalCharged),
-          init.authorizationUrl,
+          checkoutUrl,
         ),
         ref,
         kind: "txn.created",
@@ -338,7 +313,7 @@ export async function createTransaction(
           data.buyerName.split(" ")[0],
           ref,
           formatGhs(fees.totalCharged),
-          init.authorizationUrl,
+          checkoutUrl,
         ),
         ref,
         kind: "txn.created",
@@ -367,10 +342,130 @@ export async function createTransaction(
     return {
       ok: true as const,
       ref,
-      authorizationUrl: init.authorizationUrl,
+      checkoutUrl,
       transactionId: txn.id,
     };
   });
+}
+
+const checkoutMethodSchema = z.enum(["momo", "card"]);
+
+/**
+ * Buyer selects Mobile Money (Moolre) or Card (Paystack) on `/buy/checkout`.
+ * Creates or reuses the matching `payments` row and returns the PSP checkout URL.
+ */
+export async function initializeCheckoutPayment(
+  ref: string,
+  methodRaw: string,
+): Promise<{ ok: true; authorizationUrl: string } | { ok: false; error: string }> {
+  const parsedMethod = checkoutMethodSchema.safeParse(methodRaw);
+  if (!parsedMethod.success) {
+    return { ok: false, error: "Choose Mobile Money or Card to continue." };
+  }
+  const method = parsedMethod.data;
+
+  if (!isDbLive) {
+    return { ok: false, error: "Database is not configured." };
+  }
+
+  const db = getDb();
+  const [txn] = await db.select().from(transactions).where(eq(transactions.ref, ref)).limit(1);
+  if (!txn) return { ok: false, error: "Order not found." };
+  if (txn.state !== "awaiting_payment") {
+    return { ok: false, error: "This order is not awaiting payment." };
+  }
+
+  type ChargePsp = typeof moolrePsp | typeof paystackForCharge | typeof stubPsp;
+  let psp: ChargePsp;
+  let paystackChannels: string[] | undefined;
+  const stubMode = !isMoolreLive && !isPaystackLive;
+
+  if (stubMode) {
+    psp = stubPsp;
+  } else if (method === "momo") {
+    if (!isMoolreLive) {
+      return {
+        ok: false,
+        error: "Mobile Money checkout is not available. Pay with card instead.",
+      };
+    }
+    psp = moolrePsp;
+  } else {
+    if (!isPaystackLive) {
+      return {
+        ok: false,
+        error: "Card checkout is not available. Pay with Mobile Money instead.",
+      };
+    }
+    psp = paystackForCharge;
+    paystackChannels = ["card"];
+  }
+
+  const targetProvider = psp.provider;
+
+  const [latest] = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.transactionId, txn.id))
+    .orderBy(desc(payments.createdAt))
+    .limit(1);
+
+  if (
+    latest &&
+    latest.state === "initialized" &&
+    latest.psp === targetProvider &&
+    latest.authorizationUrl
+  ) {
+    return { ok: true, authorizationUrl: latest.authorizationUrl };
+  }
+
+  await db.delete(payments).where(
+    and(
+      eq(payments.transactionId, txn.id),
+      inArray(payments.state, ["initialized", "pending", "failed"]),
+    ),
+  );
+
+  const md = txn.metadata as { buyerEmail?: string | null } | null;
+  const buyerEmail =
+    md?.buyerEmail && String(md.buyerEmail).includes("@")
+      ? String(md.buyerEmail).trim()
+      : `${ref.toLowerCase()}@buyers.sbbs.gh`;
+
+  const callbackUrl = `${env.NEXT_PUBLIC_APP_URL}/buy/return?ref=${encodeURIComponent(ref)}`;
+
+  let init;
+  try {
+    init = await psp.initCharge({
+      reference: ref,
+      amount: txn.totalCharged,
+      email: buyerEmail,
+      phone: txn.buyerPhone,
+      callbackUrl,
+      metadata: { ref, transactionId: txn.id },
+      channels: paystackChannels,
+    });
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
+
+  const rawBase =
+    typeof init.raw === "object" && init.raw !== null
+      ? (init.raw as Record<string, unknown>)
+      : {};
+
+  await db.insert(payments).values({
+    transactionId: txn.id,
+    psp: psp.provider,
+    pspReference: init.reference,
+    pspAccessCode: init.accessCode,
+    authorizationUrl: init.authorizationUrl,
+    amount: txn.totalCharged,
+    state: "initialized",
+    raw: { ...rawBase, checkoutMethod: method },
+  });
+
+  return { ok: true, authorizationUrl: init.authorizationUrl };
 }
 
 export async function markPaid(ref: string): Promise<{ ok: boolean; error?: string }> {
@@ -412,7 +507,12 @@ export async function markPaid(ref: string): Promise<{ ok: boolean; error?: stri
     await db
       .update(payments)
       .set({ state: "succeeded", updatedAt: new Date() })
-      .where(eq(payments.transactionId, txn.id));
+      .where(
+        and(
+          eq(payments.transactionId, txn.id),
+          inArray(payments.state, ["initialized", "pending"]),
+        ),
+      );
 
     await db.insert(transactionEvents).values({
       transactionId: txn.id,

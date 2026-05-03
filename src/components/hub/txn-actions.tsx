@@ -67,10 +67,25 @@ export function TxnActions({
   const canConfirm = role === "buyer" && (state === "dispatched" || state === "delivered");
   const canDispute = !hasOpenDispute && ["paid", "dispatched", "delivered"].includes(state);
   const canCancel = state === "created" || state === "awaiting_payment";
+  const canPay = role === "buyer" && state === "awaiting_payment";
 
   return (
     <Card className="p-5 space-y-4">
       <h3 className="font-display font-semibold">Actions</h3>
+
+      {canPay && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Complete payment</p>
+          <p className="text-xs text-[var(--muted)]">
+            Pay with Mobile Money (Moolre) or card (Paystack) on the checkout page.
+          </p>
+          <Link href={`/buy/checkout?ref=${encodeURIComponent(txnRef)}`} className="block">
+            <Button className="w-full" size="sm">
+              Go to checkout
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {shownCode && (
         <div className="rounded-md bg-[var(--accent-soft)] p-4 text-center">

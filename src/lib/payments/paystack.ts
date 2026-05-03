@@ -41,19 +41,24 @@ export const paystack: PspAdapter = {
   provider: "paystack",
 
   async initCharge(input: InitChargeInput): Promise<InitChargeResult> {
+    const body: Record<string, unknown> = {
+      reference: input.reference,
+      amount: input.amount,
+      email: input.email,
+      currency: "GHS",
+      callback_url: input.callbackUrl,
+      metadata: input.metadata ?? {},
+    };
+    if (input.channels?.length) {
+      body.channels = input.channels;
+    } else {
+      body.channels = ["card", "mobile_money", "bank_transfer"];
+    }
     const json = await ps<{
       data: { authorization_url: string; access_code: string; reference: string };
     }>("/transaction/initialize", {
       method: "POST",
-      body: JSON.stringify({
-        reference: input.reference,
-        amount: input.amount,
-        email: input.email,
-        currency: "GHS",
-        callback_url: input.callbackUrl,
-        metadata: input.metadata ?? {},
-        channels: ["card", "mobile_money", "bank_transfer"],
-      }),
+      body: JSON.stringify(body),
     });
     return {
       authorizationUrl: json.data.authorization_url,

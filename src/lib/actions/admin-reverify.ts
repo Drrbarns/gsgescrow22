@@ -8,6 +8,7 @@ import { isDbLive } from "@/lib/env";
 import { audit } from "@/lib/audit/log";
 import { getCurrentProfile, isAdminRole } from "@/lib/auth/session";
 import { getPsp } from "@/lib/payments";
+import { getChargeAdapterForTxn } from "@/lib/payments/charge-adapter";
 import {
   markPaid,
   queueSellerPayout,
@@ -78,16 +79,21 @@ export async function reverifyPayment(
   const [txn] = await db.select().from(transactions).where(eq(transactions.ref, ref)).limit(1);
   if (!txn) return { ok: false, error: "Transaction not found" };
 
-  const psp = getPsp();
+  const chargePsp = await getChargeAdapterForTxn(txn.id);
   try {
-    const v = await psp.verifyCharge(ref);
+    const v = await chargePsp.verifyCharge(ref);
 
     await audit({
       action: "webhook.received",
       targetType: "transaction",
       targetId: txn.id,
       reason: "Manual re-verify",
-      payload: { pspStatus: v.status, pspAmount: v.amount, via: psp.provider, actor: actor.email },
+      payload: {
+        pspStatus: v.status,
+        pspAmount: v.amount,
+        via: chargePsp.provider,
+        actor: actor.email,
+      },
     });
 
     if (v.status === "succeeded" && txn.state === "awaiting_payment") {
